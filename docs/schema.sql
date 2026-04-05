@@ -41,3 +41,12 @@ CREATE TABLE IF NOT EXISTS speaking (
   link         TEXT NOT NULL,
   modules      TEXT NOT NULL             -- JSON array: '[{"title":"...","desc":"..."}]'
 );
+
+CREATE TABLE IF NOT EXISTS contacts (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  name           TEXT NOT NULL,
+  email          TEXT NOT NULL,
+  subject        TEXT NOT NULL,
+  message        TEXT NOT NULL,
+  submitted_at   TEXT NOT NULL DEFAULT (datetime('now'))  -- ISO 8601 timestamp
+);
