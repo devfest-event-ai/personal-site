@@ -1,0 +1,75 @@
+---
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout
+  title="Page Not Found — Rachmawati Ari Taurisia"
+  description="The page you're looking for doesn't exist."
+>
+  <main class="flex min-h-[calc(100svh-65px)] flex-col items-center justify-center px-4 py-24 sm:px-6">
+
+    <!-- Subtle grid background — consistent with Hero -->
+    <div
+      class="pointer-events-none fixed inset-0 -z-10 opacity-[0.025]"
+      style="background-image: linear-gradient(var(--color-foreground) 1px, transparent 1px), linear-gradient(90deg, var(--color-foreground) 1px, transparent 1px); background-size: 64px 64px;"
+      aria-hidden="true"
+    ></div>
+
+    <div class="mx-auto max-w-lg text-center">
+
+      <!-- Decorative number -->
+      <span
+        class="animate-in fade-in duration-500 mb-6 block font-mono text-[8rem] font-bold leading-none text-border sm:text-[10rem]"
+        aria-hidden="true"
+      >
+        404
+      </span>
+
+      <h1 class="animate-in fade-in slide-in-from-top-4 duration-700 mb-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+        Page not found
+      </h1>
+
+      <p class="animate-in fade-in duration-700 [animation-delay:200ms] mb-10 text-base leading-relaxed text-muted-foreground">
+        This page doesn't exist or was moved.<br>
+        Let's get you back to something real.
+      </p>
+
+      <!-- CTAs -->
+      <div class="animate-in fade-in slide-in-from-bottom-4 duration-700 [animation-delay:350ms] flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <a
+          href="/"
+          class="group inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-200 group-hover:-translate-x-0.5" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+          Back to home
+        </a>
+        <a
+          href="/projects"
+          class="inline-flex items-center justify-center rounded-lg border border-border bg-background px-6 py-3 text-sm font-semibold text-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent hover:shadow-sm"
+        >
+          Browse Page
+        </a>
+      </div>
+
+      <!-- Quick nav links -->
+      <div class="animate-in fade-in duration-700 [animation-delay:500ms] mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+        {[
+          { href: "/writing",      label: "Writing"      },
+          { href: "/publications", label: "Publications" },
+          { href: "/speaking",     label: "Speaking"     },
+          { href: "/contact",      label: "Contact"      },
+        ].map(({ href, label }) => (
+          <a
+            href={href}
+            class="text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
+          >
+            {label}
+          </a>
+        ))}
+      </div>
+
+    </div>
+  </main>
+</Layout>
