@@ -1,0 +1,247 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import DetailNavigation from "@/components/DetailNavigation.astro";
+import { turso } from "@/lib/turso";
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect("/404");
+}
+
+const result = await turso.execute({
+  sql: "SELECT * FROM publications WHERE slug = ?",
+  args: [slug],
+});
+
+if (result.rows.length === 0) {
+  return Astro.redirect("/404");
+}
+
+const pub = result.rows[0];
+const pubId = Number(pub.id);
+const title = String(pub.title);
+const journal = String(pub.journal);
+const publishedDate = String(pub.published_date);
+const abstract = String(pub.abstract);
+const doiUrl = pub.doi_url ? String(pub.doi_url) : null;
+const type = String(pub.type);
+
+const dateObj = new Date(publishedDate);
+const fullDate = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "long" });
+
+const typeLabels: Record<string, string> = {
+  "journal": "Journal Article",
+  "citation": "Expert Citation",
+};
+
+const typeBadgeColors: Record<string, string> = {
+  "journal": "border-primary/30 bg-primary/5 text-primary",
+  "citation": "border-amber-400/40 bg-amber-400/10 text-amber-400",
+};
+
+const badgeClass = typeBadgeColors[type] ?? "border-border/50 bg-muted/60 text-muted-foreground";
+const typeLabel = typeLabels[type] ?? type;
+
+// Generate APA-style citation
+const authorName = "Taurisia, R. A.";
+const citation = `${authorName} (${dateObj.getFullYear()}). ${title}. ${journal}.`;
+
+// Get prev/next publications
+const allPubs = await turso.execute("SELECT id, title, slug FROM publications ORDER BY published_date DESC");
+const pubsList = allPubs.rows.map((row) => ({
+  id: Number(row.id),
+  title: String(row.title),
+  slug: String(row.slug),
+}));
+
+const currentIndex = pubsList.findIndex((p) => p.slug === slug);
+const prevPub = currentIndex > 0 ? pubsList[currentIndex - 1] : null;
+const nextPub = currentIndex < pubsList.length - 1 ? pubsList[currentIndex + 1] : null;
+
+const seo = {
+  title: `${title} — Rachmawati Ari Taurisia`,
+  description: abstract.substring(0, 160),
+};
+---
+
+<Layout {...seo}>
+  <main>
+    <!-- Breadcrumb -->
+    <section class="mx-auto max-w-4xl px-4 pt-8 sm:px-6">
+      <Breadcrumb
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Publications", href: "/publications" },
+          { label: title, href: `/publications/${slug}` },
+        ]}
+      />
+    </section>
+
+    <!-- Header Section -->
+    <section class="border-b border-border/40 bg-background px-4 py-12 sm:px-6">
+      <div class="mx-auto max-w-4xl">
+        <div
+          data-animate="fade"
+          class="mb-4 flex flex-wrap items-center gap-2"
+        >
+          <span class={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${badgeClass}`}>
+            {typeLabel}
+          </span>
+        </div>
+        <h1
+          data-animate
+          class="mb-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl"
+        >
+          {title}
+        </h1>
+        <div
+          data-animate
+          style="transition-delay: 100ms"
+          class="flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center sm:gap-4"
+        >
+          <span class="font-medium text-foreground">{journal}</span>
+          <span class="hidden text-muted-foreground/40 sm:inline">·</span>
+          <time datetime={publishedDate}>{fullDate}</time>
+        </div>
+      </div>
+    </section>
+
+    <!-- Abstract -->
+    <section class="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+      <div
+        data-animate
+        class="rounded-2xl border border-border/50 bg-card p-6 shadow-sm sm:p-8"
+      >
+        <h2 class="mb-4 text-lg font-semibold text-foreground">Abstract</h2>
+        <p class="text-sm leading-relaxed text-muted-foreground">
+          {abstract}
+        </p>
+      </div>
+    </section>
+
+    <!-- Metadata Grid -->
+    <section class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+      <div
+        data-animate
+        class="rounded-xl border border-border/40 bg-muted/20 p-6"
+      >
+        <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Type</dt>
+            <dd class="mt-1 text-sm text-foreground">{typeLabel}</dd>
+          </div>
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Published</dt>
+            <dd class="mt-1 text-sm text-foreground">{fullDate}</dd>
+          </div>
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">Journal</dt>
+            <dd class="mt-1 text-sm text-foreground">{journal}</dd>
+          </div>
+          {doiUrl && (
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">DOI</dt>
+              <dd class="mt-1">
+                <a
+                  href={doiUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm text-primary underline underline-offset-4 hover:text-primary/80"
+                >
+                  {doiUrl}
+                </a>
+              </dd>
+            </div>
+          )}
+        </dl>
+      </div>
+    </section>
+
+    <!-- DOI Link CTA -->
+    {doiUrl && (
+      <section class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+        <div
+          data-animate
+          class="text-center"
+        >
+          <a
+            href={doiUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90 hover:shadow-md hover:shadow-primary/20"
+          >
+            View Full Paper
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+            </svg>
+          </a>
+        </div>
+      </section>
+    )}
+
+    <!-- Citation -->
+    <section class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+      <div
+        data-animate
+        class="rounded-xl border border-border/40 bg-muted/40 p-6"
+      >
+        <div class="mb-3 flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">APA Citation</span>
+          <button
+            id="copy-citation-btn"
+            class="inline-flex items-center gap-1.5 rounded-md border border-border/60 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+        <pre id="citation-text" class="whitespace-pre-wrap text-xs leading-relaxed text-foreground/80">{citation}</pre>
+      </div>
+    </section>
+
+    <!-- Navigation -->
+    <section class="mx-auto max-w-3xl px-4 pb-16 sm:px-6">
+      <DetailNavigation
+        backLabel="All publications"
+        backHref="/publications"
+        prevItem={prevPub ? { title: prevPub.title, slug: `/publications/${prevPub.slug}` } : undefined}
+        nextItem={nextPub ? { title: nextPub.title, slug: `/publications/${nextPub.slug}` } : undefined}
+      />
+    </section>
+  </main>
+</Layout>
+
+<script>
+  // Copy citation to clipboard
+  document.getElementById("copy-citation-btn")?.addEventListener("click", async () => {
+    const citationText = document.getElementById("citation-text")?.textContent;
+    if (!citationText) return;
+    
+    try {
+      await navigator.clipboard.writeText(citationText);
+      const btn = document.getElementById("copy-citation-btn");
+      if (btn) {
+        btn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Copied!
+        `;
+        setTimeout(() => {
+          btn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+            Copy
+          `;
+        }, 2000);
+      }
+    } catch (err) {
+      console.error("Failed to copy citation:", err);
+    }
+  });
+</script>

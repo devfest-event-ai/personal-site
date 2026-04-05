@@ -1,0 +1,221 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import DetailNavigation from "@/components/DetailNavigation.astro";
+import ArticleContent from "@/components/ArticleContent.astro";
+import { turso } from "@/lib/turso";
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect("/404");
+}
+
+const result = await turso.execute({
+  sql: "SELECT * FROM writing WHERE slug = ?",
+  args: [slug],
+});
+
+if (result.rows.length === 0) {
+  return Astro.redirect("/404");
+}
+
+const article = result.rows[0];
+const articleId = Number(article.id);
+const title = String(article.title);
+const category = String(article.category);
+const description = String(article.description);
+const url = String(article.url);
+const publishedDate = String(article.published_date);
+const content = article.content ? String(article.content) : null;
+const coverImage = article.cover_image ? String(article.cover_image) : null;
+const readingTime = article.reading_time ? Number(article.reading_time) : null;
+const tagsStr = article.tags ? String(article.tags) : null;
+const isExternal = Number(article.is_external) === 1;
+
+let tags: string[] = [];
+if (tagsStr) {
+  try {
+    tags = JSON.parse(tagsStr);
+  } catch {
+    tags = [tagsStr];
+  }
+}
+
+const dateObj = new Date(publishedDate);
+const fullDate = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
+
+const categoryColors: Record<string, string> = {
+  "Strategy":           "border-blue-400/40 bg-blue-400/10 text-blue-400",
+  "Technical Tutorial": "border-violet-400/40 bg-violet-400/10 text-violet-400",
+  "Analysis":           "border-amber-400/40 bg-amber-400/10 text-amber-400",
+};
+
+const badgeClass = categoryColors[category] ?? "border-border/50 bg-muted/60 text-muted-foreground";
+
+// Get prev/next articles
+const allArticles = await turso.execute("SELECT id, title, slug FROM writing ORDER BY published_date DESC");
+const articlesList = allArticles.rows.map((row) => ({
+  id: Number(row.id),
+  title: String(row.title),
+  slug: String(row.slug),
+}));
+
+const currentIndex = articlesList.findIndex((a) => a.slug === slug);
+const prevArticle = currentIndex > 0 ? articlesList[currentIndex - 1] : null;
+const nextArticle = currentIndex < articlesList.length - 1 ? articlesList[currentIndex + 1] : null;
+
+const seo = {
+  title: `${title} — Rachmawati Ari Taurisia`,
+  description: description.substring(0, 160),
+};
+---
+
+<Layout {...seo}>
+  <main>
+    <!-- Breadcrumb -->
+    <section class="mx-auto max-w-4xl px-4 pt-8 sm:px-6">
+      <Breadcrumb
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Writing", href: "/writing" },
+          { label: title, href: `/writing/${slug}` },
+        ]}
+      />
+    </section>
+
+    <!-- Header Section -->
+    <section class="border-b border-border/40 bg-background px-4 py-12 sm:px-6">
+      <div class="mx-auto max-w-3xl">
+        <div
+          data-animate="fade"
+          class="mb-4 flex flex-wrap items-center gap-3"
+        >
+          <span class={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${badgeClass}`}>
+            {category}
+          </span>
+          {isExternal && (
+            <span class="inline-flex items-center rounded-md border border-border/50 bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+              External Article
+            </span>
+          )}
+        </div>
+        <h1
+          data-animate
+          class="mb-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl"
+        >
+          {title}
+        </h1>
+        <div
+          data-animate
+          style="transition-delay: 100ms"
+          class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground"
+        >
+          <time datetime={publishedDate}>{fullDate}</time>
+          {readingTime && (
+            <>
+              <span class="text-muted-foreground/40">·</span>
+              <span>{readingTime} min read</span>
+            </>
+          )}
+        </div>
+      </div>
+    </section>
+
+    <!-- Cover Image -->
+    {coverImage && (
+      <section class="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+        <div
+          data-animate
+          class="overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm"
+        >
+          <img
+            src={coverImage}
+            alt={title}
+            class="h-full w-full object-cover"
+            width="1200"
+            height="630"
+          />
+        </div>
+      </section>
+    )}
+
+    <!-- Article Content -->
+    <section class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+      {isExternal ? (
+        <!-- External article - show description + CTA -->
+        <div
+          data-animate
+          class="rounded-2xl border border-border/50 bg-card p-8 shadow-sm"
+        >
+          <p class="mb-6 text-base leading-relaxed text-muted-foreground">
+            {description}
+          </p>
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90 hover:shadow-md hover:shadow-primary/20"
+          >
+            Read full article on LinkedIn
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+            </svg>
+          </a>
+        </div>
+      ) : content ? (
+        <!-- Internal article - render full content -->
+        <ArticleContent content={content} />
+      ) : (
+        <!-- Fallback - show description -->
+        <div
+          data-animate
+          class="rounded-2xl border border-border/50 bg-card p-8 shadow-sm"
+        >
+          <p class="text-base leading-relaxed text-muted-foreground">
+            {description}
+          </p>
+          {url && url !== "#" && (
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-all duration-200 hover:gap-2.5"
+            >
+              Read more
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+              </svg>
+            </a>
+          )}
+        </div>
+      )}
+    </section>
+
+    <!-- Tags -->
+    {tags.length > 0 && (
+      <section class="mx-auto max-w-3xl px-4 pb-8 sm:px-6">
+        <div
+          data-animate
+          class="flex flex-wrap gap-2"
+        >
+          {tags.map((tag) => (
+            <span class="inline-flex items-center rounded-md border border-border/50 bg-muted/60 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Navigation -->
+    <section class="mx-auto max-w-3xl px-4 pb-16 sm:px-6">
+      <DetailNavigation
+        backLabel="All articles"
+        backHref="/writing"
+        prevItem={prevArticle ? { title: prevArticle.title, slug: `/writing/${prevArticle.slug}` } : undefined}
+        nextItem={nextArticle ? { title: nextArticle.title, slug: `/writing/${nextArticle.slug}` } : undefined}
+      />
+    </section>
+  </main>
+</Layout>

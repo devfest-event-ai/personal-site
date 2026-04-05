@@ -1,0 +1,181 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import DetailNavigation from "@/components/DetailNavigation.astro";
+import { turso } from "@/lib/turso";
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect("/404");
+}
+
+const result = await turso.execute({
+  sql: "SELECT * FROM speaking WHERE slug = ?",
+  args: [slug],
+});
+
+if (result.rows.length === 0) {
+  return Astro.redirect("/404");
+}
+
+const event = result.rows[0];
+const eventId = Number(event.id);
+const title = String(event.title);
+const provider = String(event.provider);
+const eventDate = String(event.event_date);
+const role = String(event.role);
+const description = String(event.description);
+const link = String(event.link);
+const modulesStr = event.modules ? String(event.modules) : "[]";
+
+let modules: { title: string; desc: string }[] = [];
+try {
+  modules = JSON.parse(modulesStr);
+} catch {
+  modules = [];
+}
+
+const dateObj = new Date(eventDate);
+const fullDate = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
+const monthYear = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "short" });
+
+// Get prev/next events
+const allEvents = await turso.execute("SELECT id, title, slug FROM speaking ORDER BY id ASC");
+const eventsList = allEvents.rows.map((row) => ({
+  id: Number(row.id),
+  title: String(row.title),
+  slug: String(row.slug),
+}));
+
+const currentIndex = eventsList.findIndex((e) => e.slug === slug);
+const prevEvent = currentIndex > 0 ? eventsList[currentIndex - 1] : null;
+const nextEvent = currentIndex < eventsList.length - 1 ? eventsList[currentIndex + 1] : null;
+
+const seo = {
+  title: `${title} — Rachmawati Ari Taurisia`,
+  description: description.substring(0, 160),
+};
+---
+
+<Layout {...seo}>
+  <main>
+    <!-- Breadcrumb -->
+    <section class="mx-auto max-w-4xl px-4 pt-8 sm:px-6">
+      <Breadcrumb
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Speaking", href: "/speaking" },
+          { label: title, href: `/speaking/${slug}` },
+        ]}
+      />
+    </section>
+
+    <!-- Header Section -->
+    <section class="border-b border-border/40 bg-background px-4 py-12 sm:px-6">
+      <div class="mx-auto max-w-4xl">
+        <div
+          data-animate="fade"
+          class="mb-4 flex flex-wrap items-center gap-2"
+        >
+          <span class="inline-flex items-center rounded-md border border-primary/30 bg-primary/5 px-2 py-0.5 text-xs font-medium text-primary">
+            {provider}
+          </span>
+          <span class="inline-flex items-center rounded-md border border-border/50 bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+            {role}
+          </span>
+        </div>
+        <h1
+          data-animate
+          class="mb-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl"
+        >
+          {title}
+        </h1>
+        <div
+          data-animate
+          style="transition-delay: 100ms"
+          class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground"
+        >
+          <time datetime={eventDate}>{fullDate}</time>
+        </div>
+      </div>
+    </section>
+
+    <!-- Description -->
+    <section class="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+      <div
+        data-animate
+        class="rounded-2xl border border-border/50 bg-card p-6 shadow-sm sm:p-8"
+      >
+        <p class="text-base leading-relaxed text-muted-foreground">
+          {description}
+        </p>
+      </div>
+    </section>
+
+    <!-- Training Modules -->
+    {modules.length > 0 && (
+      <section class="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+        <p
+          data-animate
+          class="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground"
+        >
+          Training Modules
+        </p>
+        <div class="flex flex-col gap-6">
+          {modules.map((mod, i) => (
+            <div
+              data-animate
+              style={`transition-delay: ${100 + i * 80}ms`}
+              class="flex gap-4 rounded-xl border border-border/40 bg-card p-6 shadow-sm"
+            >
+              <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                {i + 1}
+              </span>
+              <div>
+                <h3 class="text-lg font-semibold text-foreground">{mod.title}</h3>
+                <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{mod.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- CTA Section -->
+    <section class="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+      <div
+        data-animate
+        class="rounded-2xl border border-border/40 bg-muted/20 p-8 text-center sm:p-12"
+      >
+        <h2 class="mb-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          Interested in this workshop?
+        </h2>
+        <p class="mb-6 text-base text-muted-foreground">
+          Join the next session and leave with 2 working automations built from scratch.
+        </p>
+        <a
+          href={link}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90 hover:shadow-md hover:shadow-primary/20"
+        >
+          Daftar Workshop
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+          </svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- Navigation -->
+    <section class="mx-auto max-w-4xl px-4 pb-16 sm:px-6">
+      <DetailNavigation
+        backLabel="All sessions"
+        backHref="/speaking"
+        prevItem={prevEvent ? { title: prevEvent.title, slug: `/speaking/${prevEvent.slug}` } : undefined}
+        nextItem={nextEvent ? { title: nextEvent.title, slug: `/speaking/${nextEvent.slug}` } : undefined}
+      />
+    </section>
+  </main>
+</Layout>

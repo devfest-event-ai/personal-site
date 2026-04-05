@@ -1,0 +1,167 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import DetailNavigation from "@/components/DetailNavigation.astro";
+import BlueprintViewer from "@/components/BlueprintViewer.astro";
+import { turso } from "@/lib/turso";
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect("/404");
+}
+
+const result = await turso.execute({
+  sql: "SELECT * FROM projects WHERE slug = ?",
+  args: [slug],
+});
+
+if (result.rows.length === 0) {
+  return Astro.redirect("/404");
+}
+
+const project = result.rows[0];
+const projectId = Number(project.id);
+const title = String(project.title);
+const description = String(project.description);
+const screenshotUrl = String(project.screenshot_url);
+const blueprintSnippet = String(project.blueprint_snippet);
+const stack = String(project.stack);
+
+let stackTags: string[] = [];
+try {
+  stackTags = JSON.parse(stack);
+} catch {
+  stackTags = [stack];
+}
+
+const hasScreenshot = Boolean(screenshotUrl?.trim() && screenshotUrl !== "null");
+
+// Get prev/next projects
+const allProjects = await turso.execute("SELECT id, title, slug FROM projects ORDER BY id ASC");
+const projectsList = allProjects.rows.map((row) => ({
+  id: Number(row.id),
+  title: String(row.title),
+  slug: String(row.slug),
+}));
+
+const currentIndex = projectsList.findIndex((p) => p.slug === slug);
+const prevProject = currentIndex > 0 ? projectsList[currentIndex - 1] : null;
+const nextProject = currentIndex < projectsList.length - 1 ? projectsList[currentIndex + 1] : null;
+
+const seo = {
+  title: `${title} — Rachmawati Ari Taurisia`,
+  description: description.substring(0, 160),
+};
+---
+
+<Layout {...seo}>
+  <main>
+    <!-- Breadcrumb -->
+    <section class="mx-auto max-w-4xl px-4 pt-8 sm:px-6">
+      <Breadcrumb
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Projects", href: "/projects" },
+          { label: title, href: `/projects/${slug}` },
+        ]}
+      />
+    </section>
+
+    <!-- Header Section -->
+    <section class="border-b border-border/40 bg-background px-4 py-12 sm:px-6">
+      <div class="mx-auto max-w-4xl">
+        <p
+          data-animate="fade"
+          class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground"
+        >
+          Automation Blueprint
+        </p>
+        <h1
+          data-animate
+          class="mb-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl"
+        >
+          {title}
+        </h1>
+        <p
+          data-animate
+          style="transition-delay: 100ms"
+          class="max-w-2xl text-base leading-relaxed text-muted-foreground"
+        >
+          {description}
+        </p>
+
+        <!-- Stack Badges -->
+        <div
+          data-animate
+          style="transition-delay: 150ms"
+          class="mt-6 flex flex-wrap gap-2"
+        >
+          {stackTags.map((tag) => (
+            <span class="inline-flex items-center rounded-md border border-border/50 bg-muted/60 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Hero Screenshot -->
+    <section class="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+      {hasScreenshot ? (
+        <div
+          data-animate
+          class="overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm"
+        >
+          <img
+            src={screenshotUrl}
+            alt={`${title} workflow canvas`}
+            class="h-full w-full object-cover"
+            width="1200"
+            height="675"
+          />
+        </div>
+      ) : (
+        <div
+          data-animate
+          class="flex h-64 items-center justify-center rounded-2xl border border-border/50 bg-muted/60"
+        >
+          <div class="flex flex-col items-center gap-3 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground/30">
+              <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/><circle cx="15" cy="15" r="1" fill="currentColor"/>
+            </svg>
+            <span class="text-sm text-muted-foreground/50">Blueprint preview not available</span>
+          </div>
+        </div>
+      )}
+    </section>
+
+    <!-- Blueprint Viewer -->
+    <section class="mx-auto max-w-4xl px-4 pb-16 sm:px-6">
+      <div
+        data-animate
+        class="rounded-2xl border border-border/50 bg-card shadow-sm"
+      >
+        <div class="border-b border-border/40 bg-primary/5 px-6 py-4">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-semibold text-foreground">Structural Blueprint</span>
+            <span class="text-xs text-muted-foreground/60">Sanitized — no credentials</span>
+          </div>
+        </div>
+        <div class="p-6">
+          <BlueprintViewer snippet={blueprintSnippet} projectId={slug} />
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation -->
+    <section class="mx-auto max-w-4xl px-4 pb-16 sm:px-6">
+      <DetailNavigation
+        backLabel="All blueprints"
+        backHref="/projects"
+        prevItem={prevProject ? { title: prevProject.title, slug: `/projects/${prevProject.slug}` } : undefined}
+        nextItem={nextProject ? { title: nextProject.title, slug: `/projects/${nextProject.slug}` } : undefined}
+      />
+    </section>
+  </main>
+</Layout>

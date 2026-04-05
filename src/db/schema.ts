@@ -1,5 +1,57 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
+// ── Content tables ─────────────────────────────────────────────────────────
+
+export const projects = sqliteTable("projects", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  description: text("description").notNull(),
+  jsonSource: text("json_source").notNull(),
+  stack: text("stack").notNull(),
+  screenshotUrl: text("screenshot_url").notNull(),
+  blueprintSnippet: text("blueprint_snippet").notNull(),
+});
+
+export const writing = sqliteTable("writing", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  category: text("category").notNull(),
+  description: text("description").notNull(),
+  url: text("url").notNull(),
+  publishedDate: text("published_date").notNull(),
+});
+
+export const publications = sqliteTable("publications", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  journal: text("journal").notNull(),
+  publishedDate: text("published_date").notNull(),
+  abstract: text("abstract").notNull(),
+  doiUrl: text("doi_url"),
+  type: text("type").notNull(),
+});
+
+export const speaking = sqliteTable("speaking", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  provider: text("provider").notNull(),
+  eventDate: text("event_date").notNull(),
+  role: text("role").notNull(),
+  description: text("description").notNull(),
+  link: text("link").notNull(),
+  modules: text("modules").notNull(),
+});
+
+export const contacts = sqliteTable("contacts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  subject: text("subject").notNull(),
+  message: text("message").notNull(),
+  submittedAt: text("submitted_at").notNull().default("(datetime('now'))"),
+});
+
 // ── Better Auth tables ─────────────────────────────────────────────────────
 
 export const user = sqliteTable("user", {
