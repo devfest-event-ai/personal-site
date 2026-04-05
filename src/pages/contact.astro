@@ -1,0 +1,272 @@
+---
+export const prerender = false;
+
+import Layout from "@/layouts/Layout.astro";
+
+const turnstileSiteKey = import.meta.env.TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA";
+---
+
+<Layout
+  title="Contact — Rachmawati Ari Taurisia"
+  description="Get in touch with Rachmawati Ari Taurisia for collaboration on AI curriculum design, n8n workflow automation workshops, or consulting engagements."
+>
+  <main>
+    <!-- Page Hero -->
+    <section class="relative overflow-hidden border-b border-border/40 bg-background px-4 py-20 text-center sm:px-6">
+      <div class="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[300px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-3xl"></div>
+
+      <p class="animate-in fade-in duration-500 mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
+        Let's Talk
+      </p>
+
+      <h1 class="animate-in fade-in slide-in-from-top-4 duration-700 mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+        Start a<br/>
+        <span class="text-primary">Conversation</span>
+      </h1>
+
+      <p class="animate-in fade-in slide-in-from-bottom-4 duration-700 [animation-delay:300ms] mx-auto max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+        Interested in collaborating on AI curriculum, automation consulting, or a workshop? Send a message below.
+      </p>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+
+      <div class="grid gap-12 lg:grid-cols-[1fr_2fr]">
+
+          <!-- Left: contact info -->
+          <div class="flex flex-col gap-6">
+            <div data-animate>
+              <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-primary">Available for</p>
+              <ul class="mt-3 space-y-2 text-sm text-muted-foreground">
+                <li class="flex items-center gap-2">
+                  <span class="h-1.5 w-1.5 rounded-full bg-primary shrink-0"></span>
+                  AI curriculum consulting
+                </li>
+                <li class="flex items-center gap-2">
+                  <span class="h-1.5 w-1.5 rounded-full bg-primary shrink-0"></span>
+                  n8n workshop facilitation
+                </li>
+                <li class="flex items-center gap-2">
+                  <span class="h-1.5 w-1.5 rounded-full bg-primary shrink-0"></span>
+                  Automation project scoping
+                </li>
+                <li class="flex items-center gap-2">
+                  <span class="h-1.5 w-1.5 rounded-full bg-primary shrink-0"></span>
+                  Speaking engagements
+                </li>
+              </ul>
+            </div>
+
+            <div data-animate style="transition-delay: 100ms" class="flex flex-col gap-3 text-sm">
+              <a
+                href="https://www.linkedin.com/in/racharta"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/>
+                </svg>
+                LinkedIn
+              </a>
+            </div>
+          </div>
+
+          <!-- Right: form -->
+          <form
+            id="contact-form"
+            class="flex flex-col gap-5"
+          >
+            <!-- Error / success messages -->
+            <p id="form-message" class="hidden rounded-lg border px-4 py-3 text-sm"></p>
+
+            <!-- Name + Email row -->
+            <div
+              data-animate
+              class="grid gap-4 sm:grid-cols-2"
+            >
+              <div class="flex flex-col gap-1.5">
+                <label for="name" class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Name <span class="text-primary">*</span>
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  name="name"
+                  required
+                  placeholder="Your name"
+                  class="rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label for="email" class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Email <span class="text-primary">*</span>
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  required
+                  placeholder="you@example.com"
+                  class="rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+
+            <!-- Subject -->
+            <div data-animate style="transition-delay: 100ms" class="flex flex-col gap-1.5">
+              <label for="subject" class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Subject <span class="text-primary">*</span>
+              </label>
+              <input
+                id="subject"
+                type="text"
+                name="subject"
+                required
+                placeholder="What's this about?"
+                class="rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+
+            <!-- Message -->
+            <div data-animate style="transition-delay: 200ms" class="flex flex-col gap-1.5">
+              <label for="message" class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Message <span class="text-primary">*</span>
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                required
+                rows={5}
+                placeholder="Tell me about your project or question..."
+                class="resize-y rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+              ></textarea>
+            </div>
+
+            <!-- Cloudflare Turnstile -->
+            <div data-animate style="transition-delay: 250ms" class="flex flex-col gap-1.5">
+              <div
+                id="cf-turnstile"
+                class="cf-turnstile"
+                data-sitekey={turnstileSiteKey}
+                data-theme="auto"
+                data-size="normal"
+              ></div>
+            </div>
+
+            <!-- Submit -->
+            <div data-animate style="transition-delay: 300ms">
+              <button
+                type="submit"
+                id="submit-btn"
+                disabled
+                class="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90 hover:shadow-md hover:shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span id="btn-text">Send message</span>
+                <svg id="btn-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>
+                </svg>
+                <!-- Loading spinner (hidden by default) -->
+                <svg id="btn-spinner" class="hidden animate-spin" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                </svg>
+              </button>
+            </div>
+          </form>
+
+    </section>
+  </main>
+
+  <script>
+    // Load Turnstile script
+    const turnstileScript = document.createElement("script");
+    turnstileScript.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    turnstileScript.async = true;
+    turnstileScript.defer = true;
+    document.head.appendChild(turnstileScript);
+
+    const form = document.getElementById("contact-form") as HTMLFormElement;
+    const messageEl = document.getElementById("form-message") as HTMLParagraphElement;
+    const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
+    const btnText = document.getElementById("btn-text") as HTMLSpanElement;
+    const btnIcon = document.getElementById("btn-icon") as unknown as SVGSVGElement;
+    const btnSpinner = document.getElementById("btn-spinner") as unknown as SVGSVGElement;
+
+    let turnstileToken = "";
+
+    turnstileScript.onload = () => {
+      (window as any).turnstile?.render("#cf-turnstile", {
+        sitekey: document.getElementById("cf-turnstile")?.getAttribute("data-sitekey"),
+        theme: "auto",
+        callback: (token: string) => {
+          turnstileToken = token;
+          submitBtn.disabled = false;
+        },
+        "expired-callback": () => {
+          turnstileToken = "";
+          submitBtn.disabled = true;
+        },
+        "error-callback": () => {
+          turnstileToken = "";
+          submitBtn.disabled = true;
+        },
+      });
+    };
+
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!turnstileToken) {
+        messageEl.textContent = "Please complete the CAPTCHA verification.";
+        messageEl.className = "rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive";
+        messageEl.classList.remove("hidden");
+        return;
+      }
+
+      // Show loading state
+      submitBtn.disabled = true;
+      btnText.textContent = "Sending...";
+      btnIcon.classList.add("hidden");
+      btnSpinner.classList.remove("hidden");
+      messageEl.classList.add("hidden");
+
+      const formData = new FormData(form);
+      formData.append("cf-turnstile-response", turnstileToken);
+
+      try {
+        const response = await fetch("/api/contact", {
+          method: "POST",
+          body: formData,
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          messageEl.textContent = "Message sent! Thanks for reaching out. I'll get back to you as soon as possible.";
+          messageEl.className = "rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary";
+          messageEl.classList.remove("hidden");
+          form.reset();
+          turnstileToken = "";
+          (window as any).turnstile?.reset?.();
+        } else {
+          messageEl.textContent = result.error || "Failed to submit form. Please try again.";
+          messageEl.className = "rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive";
+          messageEl.classList.remove("hidden");
+          turnstileToken = "";
+          (window as any).turnstile?.reset?.();
+        }
+      } catch {
+        messageEl.textContent = "Network error. Please check your connection and try again.";
+        messageEl.className = "rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive";
+        messageEl.classList.remove("hidden");
+      } finally {
+        // Re-enable only if Turnstile token is still valid
+        submitBtn.disabled = !turnstileToken;
+        btnText.textContent = "Send message";
+        btnIcon.classList.remove("hidden");
+        btnSpinner.classList.add("hidden");
+      }
+    });
+  </script>
+</Layout>
