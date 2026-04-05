@@ -1,0 +1,9 @@
+{
+    "mcpServers": {
+        "starwind-ui": {
+        "command": "bunx",
+        "args": ["-y", "@starwind-ui/mcp"],
+        "env": {}
+        }
+    }
+}

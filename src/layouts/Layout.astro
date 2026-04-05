@@ -1,23 +1,71 @@
+---
+import "@/styles/starwind.css";
+import { SEO } from "astro-seo";
+import Navbar from "@/components/Navbar.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Rachmawati Ari Taurisia — AI & Automation Curriculum Architect",
+  description = "AI & Automation Curriculum Engineer and n8n Specialist. I design production-ready workflow automations and GenAI-powered curricula for professionals and businesses in Indonesia.",
+} = Astro.props;
+
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Rachmawati Ari Taurisia",
+  "jobTitle": "AI & Automation Curriculum Architect",
+  "url": "https://racharta.vercel.app",
+  "sameAs": [
+    "https://www.linkedin.com/in/racharta"
+  ],
+  "knowsAbout": [
+    "n8n Workflow Automation",
+    "GenAI Productivity",
+    "Curriculum Design",
+    "AI Agent Development",
+    "Gemini API",
+    "Google Workspace Automation"
+  ],
+  "description": description,
+};
+---
+
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<slot />
-	</body>
-</html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>
+    <SEO
+      title={title}
+      description={description}
+      openGraph={{
+        basic: {
+          title,
+          type: "website",
+          image: "/og-image.png",
+        },
+      }}
+      extend={{
+        meta: [
+          { name: "keywords", content: "AI Automation Curriculum Engineer, n8n Specialist, GenAI Productivity Expert, Workflow Automation Indonesia, Curriculum Designer AI" },
+          { name: "author", content: "Rachmawati Ari Taurisia" },
+        ],
+      }}
+    />
+
+    <!-- JSON-LD: Person schema -->
+    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+  </head>
+  <body>
+    <Navbar />
+    <slot />
+  </body>
+</html>
