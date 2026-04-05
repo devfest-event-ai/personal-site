@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" width="800" height="420">
+  <rect width="800" height="420" fill="#1a1a2e"/>
+  <rect width="800" height="420" fill="url(#grid3)" opacity="0.06"/>
+  <defs>
+    <pattern id="grid3" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#ffffff" stroke-width="0.5"/>
+    </pattern>
+    <marker id="arrow3" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#3b82f6"/></marker>
+  </defs>
+  <!-- Node 1: Webhook -->
+  <rect x="30" y="170" width="120" height="80" rx="8" fill="#1e3a5f" stroke="#f59e0b" stroke-width="1.5"/>
+  <rect x="30" y="170" width="120" height="28" rx="8" fill="#f59e0b" opacity="0.8"/>
+  <text x="90" y="189" text-anchor="middle" font-family="system-ui" font-size="10" fill="white" font-weight="600">Webhook</text>
+  <text x="90" y="222" text-anchor="middle" font-family="system-ui" font-size="9" fill="#94a3b8">Receive task +</text>
+  <text x="90" y="238" text-anchor="middle" font-family="system-ui" font-size="9" fill="#94a3b8">persona input</text>
+  <line x1="150" y1="210" x2="185" y2="210" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow3)"/>
+  <!-- Node 2: Switch -->
+  <rect x="185" y="170" width="120" height="80" rx="8" fill="#1e3a5f" stroke="#ec4899" stroke-width="1.5"/>
+  <rect x="185" y="170" width="120" height="28" rx="8" fill="#ec4899" opacity="0.8"/>
+  <text x="245" y="189" text-anchor="middle" font-family="system-ui" font-size="10" fill="white" font-weight="600">Switch Node</text>
+  <text x="245" y="222" text-anchor="middle" font-family="system-ui" font-size="9" fill="#94a3b8">Route by persona</text>
+  <text x="245" y="238" text-anchor="middle" font-family="system-ui" font-size="9" fill="#94a3b8">type</text>
+  <!-- Switch branches -->
+  <line x1="305" y1="198" x2="340" y2="140" stroke="#ec4899" stroke-width="1" stroke-dasharray="4 2"/>
+  <line x1="305" y1="210" x2="340" y2="210" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow3)"/>
+  <line x1="305" y1="222" x2="340" y2="280" stroke="#ec4899" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="325" y="130" font-family="system-ui" font-size="8" fill="#ec4899">Engineer</text>
+  <text x="325" y="205" font-family="system-ui" font-size="8" fill="#94a3b8">PM</text>
+  <text x="325" y="295" font-family="system-ui" font-size="8" fill="#ec4899">Casual</text>
+  <!-- Node 3: Set Node -->
+  <rect x="340" y="170" width="120" height="80" rx="8" fill="#1e3a5f" stroke="#6366f1" stroke-width="1.5"/>
+  <rect x="340" y="170" width="120" height="28" rx="8" fill="#6366f1" opacity="0.8"/>
+  <text x="400" y="189" text-anchor="middle" font-family="system-ui" font-size="10" fill="white" font-weight="600">Set Node</text>
+  <text x="400" y="222" text-anchor="middle" font-family="system-ui" font-size="9" fill="#94a3b8">Inject dynamic</text>
+  <text x="400" y="238" text-anchor="middle" font-family="system-ui" font-size="9" fill="#94a3b8">system prompt</text>
+  <line x1="460" y1="210" x2="495" y2="210" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow3)"/>
+  <!-- Node 4: HTTP Request -->
+  <rect x="495" y="170" width="120" height="80" rx="8" fill="#1e3a5f" stroke="#8b5cf6" stroke-width="1.5"/>
+  <rect x="495" y="170" width="120" height="28" rx="8" fill="#8b5cf6" opacity="0.8"/>
+  <text x="555" y="189" text-anchor="middle" font-family="system-ui" font-size="10" fill="white" font-weight="600">HTTP Request</text>
+  <text x="555" y="222" text-anchor="middle" font-family="system-ui" font-size="9" fill="#94a3b8">Call LLM API</text>
+  <text x="555" y="238" text-anchor="middle" font-family="system-ui" font-size="9" fill="#94a3b8">with persona</text>
+  <line x1="615" y1="210" x2="650" y2="210" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow3)"/>
+  <!-- Node 5: Respond -->
+  <rect x="650" y="170" width="120" height="80" rx="8" fill="#1e3a5f" stroke="#10b981" stroke-width="1.5"/>
+  <rect x="650" y="170" width="120" height="28" rx="8" fill="#10b981" opacity="0.8"/>
+  <text x="710" y="189" text-anchor="middle" font-family="system-ui" font-size="10" fill="white" font-weight="600">Respond</text>
+  <text x="710" y="222" text-anchor="middle" font-family="system-ui" font-size="9" fill="#94a3b8">Return formatted</text>
+  <text x="710" y="238" text-anchor="middle" font-family="system-ui" font-size="9" fill="#94a3b8">task output</text>
+  <text x="400" y="380" text-anchor="middle" font-family="system-ui" font-size="12" fill="#475569">Multi-Persona Assistant — n8n Workflow Canvas</text>
+  <text x="400" y="400" text-anchor="middle" font-family="system-ui" font-size="10" fill="#334155">Screenshot placeholder — replace with real canvas export</text>
+</svg>

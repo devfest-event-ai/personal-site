@@ -1,0 +1,73 @@
+---
+import BlueprintViewer from "@/components/BlueprintViewer.astro";
+
+interface Project {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  stack: string;          // JSON array string: '["n8n","Gmail API"]'
+  screenshot_url: string;
+  blueprint_snippet: string;
+}
+
+interface Props {
+  project: Project;
+  index: number;
+}
+
+const { project, index } = Astro.props;
+
+let stackTags: string[] = [];
+try {
+  stackTags = JSON.parse(project.stack);
+} catch {
+  stackTags = [project.stack];
+}
+
+const staggerDelay = 100 + index * 150;
+---
+
+<article
+  data-animate
+  style={`transition-delay: ${staggerDelay}ms`}
+  class="group flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/5"
+>
+  <!-- Screenshot -->
+  <div class="relative aspect-[16/9] overflow-hidden bg-muted">
+    <img
+      src={project.screenshot_url}
+      alt={`${project.title} workflow canvas`}
+      loading="lazy"
+      decoding="async"
+      width="800"
+      height="450"
+      class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+    />
+  </div>
+
+  <!-- Content -->
+  <div class="flex flex-1 flex-col gap-4 p-6">
+    <!-- Title -->
+    <h3 class="text-xl font-bold tracking-tight text-foreground">
+      {project.title}
+    </h3>
+
+    <!-- Description -->
+    <p class="flex-1 text-sm leading-relaxed text-muted-foreground">
+      {project.description}
+    </p>
+
+    <!-- Stack badges -->
+    <div class="flex flex-wrap gap-1.5">
+      {stackTags.map((tag) => (
+        <span class="inline-flex items-center rounded-md border border-border/50 bg-muted/60 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+          {tag}
+        </span>
+      ))}
+    </div>
+
+    <!-- Blueprint viewer toggle -->
+    <BlueprintViewer snippet={project.blueprint_snippet} projectId={project.slug} />
+  </div>
+</article>

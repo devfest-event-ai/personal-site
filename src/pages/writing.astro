@@ -1,0 +1,117 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { turso } from "@/lib/turso";
+
+const result = await turso.execute("SELECT * FROM writing ORDER BY published_date DESC");
+
+const articles = result.rows.map((row) => ({
+  id:             Number(row.id),
+  title:          String(row.title),
+  category:       String(row.category),
+  description:    String(row.description),
+  url:            String(row.url),
+  published_date: String(row.published_date),
+}));
+
+const categoryColors: Record<string, string> = {
+  "Strategy":           "border-blue-400/40 bg-blue-400/10 text-blue-400",
+  "Technical Tutorial": "border-violet-400/40 bg-violet-400/10 text-violet-400",
+  "Analysis":           "border-amber-400/40 bg-amber-400/10 text-amber-400",
+};
+---
+
+<Layout
+  title="Writing — Rachmawati Ari Taurisia"
+  description="Articles on AI strategy, automation engineering, and curriculum design — written for productivity professionals and AI practitioners."
+>
+  <main>
+    <!-- Page Hero -->
+    <section class="relative overflow-hidden border-b border-border/40 bg-background px-4 py-20 text-center sm:px-6">
+      <div class="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[300px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-3xl"></div>
+
+      <p class="animate-in fade-in duration-500 mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
+        Writing
+      </p>
+
+      <h1 class="animate-in fade-in slide-in-from-top-4 duration-700 mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+        Ideas on AI &<br/>
+        <span class="text-primary">Automation</span>
+      </h1>
+
+      <p class="animate-in fade-in slide-in-from-bottom-4 duration-700 [animation-delay:300ms] mx-auto max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+        Strategy, tutorials, and analysis for professionals building with AI.
+      </p>
+
+      <div class="animate-in fade-in duration-700 [animation-delay:500ms] mt-6 flex items-center justify-center gap-6 text-sm text-muted-foreground">
+        <span class="flex items-center gap-1.5">
+          <span class="h-1.5 w-1.5 rounded-full bg-primary"></span>
+          {articles.length} articles
+        </span>
+      </div>
+    </section>
+
+    <!-- Articles Grid -->
+    <section class="mx-auto max-w-4xl px-4 py-16 sm:px-6">
+      {articles.length > 0 ? (
+        <div class="flex flex-col gap-6">
+          {articles.map((article, i) => {
+            const dateObj = new Date(article.published_date);
+            const formatted = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
+            const badgeClass = categoryColors[article.category] ?? "border-border/50 bg-muted/60 text-muted-foreground";
+
+            return (
+              <article
+                data-animate
+                style={`transition-delay: ${100 + i * 120}ms`}
+                class="group flex flex-col gap-4 overflow-hidden rounded-2xl border border-border/50 bg-card p-6 shadow-sm transition-shadow duration-300 hover:shadow-md hover:shadow-primary/5 sm:flex-row sm:items-start sm:gap-6 sm:p-8"
+              >
+                <!-- Left: date column -->
+                <div class="shrink-0 sm:w-28">
+                  <time
+                    datetime={article.published_date}
+                    class="text-xs text-muted-foreground/70"
+                  >
+                    {formatted}
+                  </time>
+                </div>
+
+                <!-- Right: content -->
+                <div class="flex flex-1 flex-col gap-3">
+                  <!-- Category badge -->
+                  <span class={`inline-flex w-fit items-center rounded-md border px-2.5 py-0.5 text-xs font-medium ${badgeClass}`}>
+                    {article.category}
+                  </span>
+
+                  <!-- Title -->
+                  <h2 class="text-lg font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                    {article.title}
+                  </h2>
+
+                  <!-- Description -->
+                  <p class="text-sm leading-relaxed text-muted-foreground">
+                    {article.description}
+                  </p>
+
+                  <!-- Read link -->
+                  <a
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="mt-1 inline-flex w-fit items-center gap-1.5 text-sm font-medium text-primary transition-all duration-200 hover:gap-2.5"
+                  >
+                    Read article
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                    </svg>
+                  </a>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <p class="py-20 text-center text-muted-foreground">No articles found.</p>
+      )}
+    </section>
+  </main>
+</Layout>

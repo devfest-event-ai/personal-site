@@ -136,10 +136,97 @@ Insert the 3 projects, 3 writing articles, 2 publications, 1 speaking event per 
 
 ---
 
+## Phase 0 — Infrastructure ✅ DONE
+
+- Turso DB: `porto-ibu` (group `ibu`) — URL: `libsql://porto-ibu-hasban-fardani.aws-ap-northeast-1.turso.io`
+- Schema created, all 4 tables seeded (projects=3, writing=3, publications=4, speaking=1)
+- `.env` populated with real credentials (gitignored)
+- `src/lib/turso.ts` singleton created
+- Netlify adapter installed (`@astrojs/netlify`)
+- Remaining: manually add env vars to Netlify dashboard before first deploy
+
+---
+
 ## Phase 1 — Foundation & Navigation ✅ DONE
 
 - `Layout.astro` updated: Navbar, SEO props, JSON-LD Person schema
 - `Navbar.astro` created: authority-funnel links, hamburger, sticky + backdrop-blur, active state
+
+---
+
+## Phase 1.5 — Animation Infrastructure
+
+**Package:** `tailwind-animations` (`pnpm add tailwind-animations`)
+
+**Setup (Tailwind v4 CSS-first):**
+```css
+/* src/styles/starwind.css — add after existing @imports */
+@plugin 'tailwind-animations';
+```
+
+**Strategy:** CSS scroll-driven animations as primary mechanism. Intersection Observer as progressive enhancement for browsers without scroll-driven animation support.
+
+### Animation Map per Section
+
+| Section | Animation | Trigger |
+|---|---|---|
+| Hero headline | `animate-fade-in-down` | On load (no scroll) |
+| Hero subtext | `animate-fade-in-up` | On load, 200ms delay |
+| Hero CTA buttons | `animate-fade-in-up` | On load, 400ms delay |
+| Logo strip items | `animate-fade-in-up` | Scroll, stagger 100ms |
+| Page section headings | `animate-fade-in-down` | Scroll |
+| Project cards | `animate-fade-in-up` | Scroll, stagger 150ms per card |
+| Speaking module list items | `animate-slide-in-left` | Scroll, stagger 80ms |
+| Writing article cards | `animate-fade-in-up` | Scroll, stagger 120ms |
+| Publication journal cards | `animate-fade-in-up` | Scroll, stagger 120ms |
+| Contact form fields | `animate-fade-in-up` | Scroll, stagger 100ms |
+
+### Intersection Observer Helper (`src/lib/scroll-animate.ts`)
+
+A tiny (<30 line) vanilla TS utility that:
+1. Queries all `[data-scroll-animate]` elements
+2. Uses `IntersectionObserver` with `threshold: 0.1`
+3. Adds CSS class `is-visible` when element enters viewport
+4. Removes the invisible state (elements start opacity-0, translate-y-4)
+
+```ts
+// Usage in Astro component:
+// <div data-scroll-animate class="opacity-0 translate-y-4 transition-all duration-700">
+//   content
+// </div>
+```
+
+The `<script>` initializing the observer is added globally in `Layout.astro`.
+
+### Stagger Delay Utilities (added to `starwind.css`)
+
+```css
+@theme {
+  --animate-delay-100: 100ms;
+  --animate-delay-200: 200ms;
+  --animate-delay-300: 300ms;
+  --animate-delay-400: 400ms;
+  --animate-delay-500: 500ms;
+}
+```
+
+Classes: `[animation-delay:100ms]`, `[animation-delay:200ms]`, etc. via Tailwind arbitrary values.
+
+### Accessibility
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  [data-scroll-animate],
+  .animate-fade-in-up,
+  .animate-fade-in-down,
+  .animate-slide-in-left {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+```
 
 ---
 
@@ -270,6 +357,8 @@ export const prerender = false; // opt out of prerendering → SSR on Netlify
 | **Shiki not `react-syntax-highlighter`** | Built into Astro — no React dependency needed. |
 | **Vanilla JS typewriter** | No external lib for simple text cycling. |
 | **Starwind UI components** | Use `starwind add` MCP tool to install Button, Card, Badge as needed. |
+| **`tailwind-animations` + IntersectionObserver** | CSS-first scroll animations with `@plugin 'tailwind-animations'` in Tailwind v4. IntersectionObserver as JS fallback. No animation library with runtime overhead. |
+| **Scroll-triggered via `data-scroll-animate`** | Elements start invisible (`opacity-0 translate-y-4`); observer adds `is-visible` class on viewport entry. Stagger via inline `animation-delay` arbitrary values. |
 
 ---
 

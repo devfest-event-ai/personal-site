@@ -68,4 +68,27 @@ const personSchema = {
     <Navbar />
     <slot />
   </body>
+
+  <script>
+    function initScrollAnimations() {
+      const els = document.querySelectorAll<HTMLElement>("[data-animate]");
+      if (!els.length) return;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.1, rootMargin: "0px 0px -48px 0px" }
+      );
+
+      els.forEach((el) => observer.observe(el));
+    }
+
+    document.addEventListener("DOMContentLoaded", initScrollAnimations);
+  </script>
 </html>

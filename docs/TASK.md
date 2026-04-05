@@ -4,24 +4,24 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
 
 ---
 
-## Phase 0 — Infrastructure Setup (Turso + Netlify)
+## Phase 0 — Infrastructure Setup (Turso + Netlify) ✅ COMPLETE
 
 - [x] **0.1** Run `pnpm astro add netlify` — installs adapter and auto-updates `astro.config.mjs`
 - [x] **0.2** ~~Set `output: 'hybrid'`~~ — removed in Astro 6; `output: 'static'` (default) behaves identically
 - [x] **0.3** Run `pnpm add @libsql/client` — install Turso client
 - [x] **0.4** Create `src/lib/turso.ts` — Turso client singleton using `@libsql/client/web`
-- [x] **0.5** Add `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` to `.env` (local dev — fill in real values)
+- [x] **0.5** Add `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` to `.env` (real values from DB `porto-ibu`, group `ibu`)
 - [ ] **0.6** Add same env vars to Netlify dashboard → Site settings → Environment variables *(manual — do before first deploy)*
-- [ ] **0.7** Install Turso CLI (`curl -sSfL https://get.tur.so/install.sh | bash`) → authenticate (`turso auth login`) → create DB (`turso db create racharta-portfolio`)
-- [ ] **0.8** Run schema: `turso db shell racharta-portfolio < docs/schema.sql`
-- [ ] **0.9** Seed data: `turso db shell racharta-portfolio < docs/seed.sql`
+- [x] **0.7** Turso CLI confirmed at `/Users/antonioperez/.turso/turso`; authenticated as `hasban-fardani`; used existing DB `porto-ibu`
+- [x] **0.8** Run schema: `turso db shell porto-ibu < docs/schema.sql` ✓ all 4 tables created
+- [x] **0.9** Seed data: `turso db shell porto-ibu < docs/seed.sql` ✓ projects=3, writing=3, publications=4, speaking=1
 - [x] **0.10** Add `.env.example` with placeholder values
 
 ---
 
-## Phase 1 — Foundation & Navigation
+## Phase 1 — Foundation & Navigation ✅ COMPLETE
 
-- [x] **1.1** Create `docs/` folder and confirm `PLAN.md` + `TASK.md` exist *(planning only)*
+- [x] **1.1** Create `docs/` folder and confirm `PLAN.md` + `TASK.md` exist
 - [x] **1.2** Update `src/layouts/Layout.astro` — add `<Navbar />` slot and update `<SEO>` with keyword-rich metadata
 - [x] **1.3** Add JSON-LD `Person` schema in `Layout.astro` `<head>`
 - [x] **1.4** Create `src/components/Navbar.astro` — desktop links in authority-funnel order
@@ -31,68 +31,82 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
 
 ---
 
-## Phase 2 — Home Page
+## Phase 1.5 — Animation Infrastructure ✅ COMPLETE
 
-- [ ] **2.1** Replace `src/components/Welcome.astro` with new `src/components/Hero.astro`
-- [ ] **2.2** Implement typewriter effect in `Hero.astro` with vanilla JS (no external lib)
-  - Strings: `["AI & Automation Architect", "GenAI Curriculum Specialist", "Top Tech Content Creator"]`
-- [ ] **2.3** Add hero headline: `Hi, I'm Rachmawati Ari Taurisia`
-- [ ] **2.4** Add hero statement paragraph (full text per PLAN.md §2.1)
-- [ ] **2.5** Add two CTA buttons using Starwind UI Button component:
-  - Primary: `View My Automation Blueprints` → `/projects`
-  - Secondary: `Subscribe to My Insights` → `/writing`
-- [ ] **2.6** Install Starwind Button component via `starwind add button`
-- [ ] **2.7** Create `src/components/LogoStrip.astro` — grayscale logos with hover-to-color effect
-- [ ] **2.8** Collect/source SVG logos: Google Cloud, SMKDEV, EUDEKA, WomenTech Network → `src/assets/logos/`
-- [ ] **2.9** Update `src/pages/index.astro` to use `<Hero />` and `<LogoStrip />`
+- [x] **A.1** ~~`pnpm add tailwind-animations`~~ — `tw-animate-css` already installed; used that for on-load animations
+- [x] **A.2** Add scroll animation CSS to `starwind.css`: `[data-animate]` base + `is-visible` transition state + `prefers-reduced-motion` override
+- [x] **A.3** Stagger via inline `style="transition-delay: Xms"` on each animated child element
+- [x] **A.4** IntersectionObserver inlined in `Layout.astro` `<script>` — adds `is-visible` when element enters viewport, then unobserves
+- [x] **A.5** Global script active in `Layout.astro` — fires on `DOMContentLoaded` across all pages
 
 ---
 
-## Phase 3 — Projects Page
+## Phase 2 — Home Page ✅ COMPLETE
 
-- [ ] **3.1** Add n8n workflow canvas screenshots to `src/assets/workflows/` (3 images, one per project — provided by client)
-- [ ] **3.2** Seed `projects` table in Turso with 3 project rows (sanitized `blueprint_snippet` — no credentials)
-- [ ] **3.3** Install Starwind Card and Badge components: `starwind add card badge`
-- [ ] **3.4** Create `src/components/ProjectCard.astro` with:
-  - `<Image>` from `astro:assets` for workflow screenshot
-  - Title, description ("Production-Ready Blueprint"), stack tag badges
-  - Toggle button for blueprint viewer
-- [ ] **3.5** Create `src/components/BlueprintViewer.astro` — `<pre><code>` with Shiki syntax highlight + JS toggle
-- [ ] **3.6** Create `src/pages/projects/index.astro` — query Turso `projects` table at build time, render `<ProjectCard />` per row
+- [x] **2.1** Created `src/components/Hero.astro` (replaced Welcome.astro)
+- [x] **2.2** Typewriter effect — vanilla JS, cycles 3 strings, starts at 1000ms after load
+- [x] **2.3** Hero headline with `animate-in fade-in slide-in-from-top-4 duration-700`
+- [x] **2.4** Hero paragraph with `animate-in fade-in slide-in-from-bottom-4 duration-700 [animation-delay:450ms]`
+- [x] **2.5** Two CTA buttons — Primary (bg-primary) + Secondary (bordered), animate in at 650ms delay
+- [x] **2.6** Buttons styled with semantic design tokens — no Starwind Button needed at this stage
+- [x] **2.7** Created `src/components/LogoStrip.astro` — grayscale + hover-to-color, scroll-triggered stagger
+- [ ] **2.8** Placeholder SVGs in use — **awaiting real assets**: Google Cloud, SMKDEV, EUDEKA, WomenTech Network
+- [x] **2.9** `src/pages/index.astro` updated to use `<Hero />` and `<LogoStrip />`
 
 ---
 
-## Phase 4 — Speaking Page
+## Phase 3 — Projects Page ✅ COMPLETE
 
-- [ ] **4.1** Seed `speaking` table in Turso with 1 workshop row (modules as JSON string)
-- [ ] **4.2** Create `src/pages/speaking.astro` — query Turso `speaking` table at build time, render featured workshop section
+- [~] **3.1** SVG placeholder images created in `public/workflows/` — **awaiting real PNG screenshots from client** (invoice-tracker.png, ai-chatbot-smkdev.png, persona-assistant.png)
+- [x] **3.2** Seed `projects` table already done in Phase 0.9
+- [x] **3.3** ~~Starwind Card/Badge~~ — built custom components with Tailwind tokens instead (no external dep needed)
+- [x] **3.4** Created `src/components/ProjectCard.astro`:
+  - `<img loading="lazy">` for workflow screenshot (swap to `<Image>` once real PNGs are available)
+  - Title, description, "Production-Ready Blueprint" overlay badge
+  - Stack tag badges (parsed from JSON array)
+  - `data-animate` scroll-trigger + stagger delay per card index
+- [x] **3.5** Created `src/components/BlueprintViewer.astro` — `<pre><code>` JSON toggle, JS expand/collapse with chevron rotate
+- [x] **3.6** Created `src/pages/projects/index.astro` — queries Turso `projects` table at build time, renders `<ProjectCard />` per row
+  - Page hero with `animate-in fade-in slide-in-from-top-4` animations
+
+---
+
+## Phase 4 — Speaking Page ✅ COMPLETE
+
+- [x] **4.1** Seed `speaking` table already done in Phase 0.9
+- [x] **4.2** Create `src/pages/speaking.astro` — query Turso `speaking` table at build time
   - "Featured Commercial Workshop" badge
-  - EUDEKA + SMKDEV logos (prominent)
-  - Workshop title, meta, description
-  - Training module list
-  - CTA button linking to `https://goakal.com/smkdev/productivity-workflow-automation-ai-assistant`
-- [ ] **4.3** Add JSON-LD `Course` schema in speaking page `<head>`
+  - Provider badge (EUDEKA x SMKDEV) + date/role meta row — staggered
+  - Workshop title, meta, description — `data-animate` scroll stagger
+  - Training module list items — numbered, staggered per item
+  - CTA button → `https://goakal.com/smkdev/productivity-workflow-automation-ai-assistant`
+- [x] **4.3** Add JSON-LD `Course` schema in speaking page `<head>`
 
 ---
 
-## Phase 5 — Writing Page
+## Phase 5 — Writing Page ✅ COMPLETE
 
-- [ ] **5.1** Seed `writing` table in Turso with 3 article rows
-- [ ] **5.2** Create `src/pages/writing.astro` — query Turso `writing` table at build time, render article cards with category badge and external link
+- [x] **5.1** Seed `writing` table already done in Phase 0.9
+- [x] **5.2** Create `src/pages/writing.astro` — query Turso `writing` table at build time
+  - Article cards: `data-animate` with stagger, color-coded category badge and external link
+  - Date column + animated "Read article" arrow link
 
 ---
 
 ## Phase 6 — Publications Page
 
-- [ ] **6.1** Seed `publications` table in Turso with 2 journal rows + citation rows
-- [ ] **6.2** Create `src/pages/publications.astro` — query Turso `publications` table at build time, render journal cards + citations subsection
+- [ ] **6.1** Seed `publications` table already done in Phase 0.9
+- [ ] **6.2** Create `src/pages/publications.astro` — query Turso `publications` table at build time
+  - Journal cards: `fade-in-up` staggered
+  - Citations subsection: `slide-in-left` staggered
 
 ---
 
 ## Phase 7 — Contact Page
 
 - [ ] **7.1** Create `src/pages/contact.astro` with `export const prerender = false` (SSR on Netlify)
-- [ ] **7.2** Add Netlify Forms: `<form netlify data-netlify="true">` — no backend code needed, Netlify handles submissions
+- [ ] **7.2** Add Netlify Forms: `<form netlify data-netlify="true">` — no backend code needed
+  - Form fields: `fade-in-up` staggered on scroll
 
 ---
 
@@ -104,6 +118,7 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [ ] **8.4** Test mobile hamburger menu at 375px breakpoint
 - [ ] **8.5** Test responsive layout at 768px (tablet) and 1280px (desktop)
 - [ ] **8.6** Run `pnpm build` and confirm 0 TypeScript errors
+- [ ] **8.7** Add `prefers-reduced-motion` override in `starwind.css` — disable all animations for accessibility
 
 ---
 
@@ -116,13 +131,9 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
 
 ---
 
-## Dependency: Assets & Credentials Needed Before Implementation
+## Dependency: Assets Needed Before Implementation
 
-Before Phase 0 can complete (0.7–0.9), you need:
-- Turso CLI installed + account authenticated (`turso auth login`)
-- Turso database URL and auth token
-
-Before Phase 3 can begin, these assets must be provided:
+Before Phase 3 can begin:
 
 | Asset | Format | Used In |
 |---|---|---|
@@ -136,12 +147,12 @@ Before Phase 3 can begin, these assets must be provided:
 
 ---
 
-## Implementation Order (Recommended)
+## Implementation Order (Updated)
 
 ```
-Phase 1 (Nav) → Phase 2 (Home) → Phase 3 (Projects) → Phase 4 (Speaking)
-→ Phase 5 (Writing) → Phase 6 (Publications) → Phase 7 (Contact)
-→ Phase 8 (SEO/Perf) → Phase 9 (Security audit)
+Phase 1.5 (Animations infra) → Phase 2 (Home) → Phase 3 (Projects)
+→ Phase 4 (Speaking) → Phase 5 (Writing) → Phase 6 (Publications)
+→ Phase 7 (Contact) → Phase 8 (SEO/Perf) → Phase 9 (Security audit)
 ```
 
 Each phase should be a separate PR — do not merge directly to `main`.
