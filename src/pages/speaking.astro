@@ -37,146 +37,138 @@ const courseSchema = events[0] ? {
 
 <Layout
   title="Speaking & Workshops — Rachmawati Ari Taurisia"
-  description="Live workshop on productivity workflow automation: n8n, AI assistants, and real production blueprints. Featured at EUDEKA x SMKDEV."
+  description="Live workshop on productivity workflow automation: n8n, AI assistants, and real production blueprints. Participants leave with 2 working automations built from scratch."
 >
   {courseSchema && (
     <script type="application/ld+json" set:html={JSON.stringify(courseSchema)} slot="head" />
   )}
 
   <main>
-    <!-- Page Hero -->
-    <section class="relative overflow-hidden border-b border-border/40 bg-background px-4 py-20 text-center sm:px-6">
-      <div class="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[300px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-3xl"></div>
+    <!-- Page header — left-aligned, no glow, no pill badge -->
+    <section class="border-b border-border/40 bg-background px-4 py-16 sm:px-6">
+      <div class="mx-auto max-w-4xl">
+        <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p class="animate-in fade-in duration-500 mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Speaking & Workshops
+            </p>
+            <h1 class="animate-in fade-in slide-in-from-top-4 duration-700 mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+              Live Training &amp;<br>
+              <span class="text-primary">Workshop Sessions</span>
+            </h1>
+            <p class="animate-in fade-in duration-700 [animation-delay:200ms] max-w-lg text-base leading-relaxed text-muted-foreground">
+              Deep-dive sessions where participants build real, production-ready automations —
+              not just theory.
+            </p>
+          </div>
 
-      <p class="animate-in fade-in duration-500 mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
-        Speaking & Workshops
-      </p>
-
-      <h1 class="animate-in fade-in slide-in-from-top-4 duration-700 mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-        Live Training &<br/>
-        <span class="text-primary">Workshop Sessions</span>
-      </h1>
-
-      <p class="animate-in fade-in slide-in-from-bottom-4 duration-700 [animation-delay:300ms] mx-auto max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-        Deep-dive sessions where participants build real, production-ready automations —
-        not just theory.
-      </p>
+          <!-- Stats — right side on desktop -->
+          <div class="animate-in fade-in duration-700 [animation-delay:300ms] flex shrink-0 items-center gap-8 lg:flex-col lg:items-end lg:gap-3">
+            <div class="lg:text-right">
+              <p class="text-4xl font-bold tracking-tight text-foreground">{events.length}</p>
+              <p class="text-sm text-muted-foreground">workshop{events.length !== 1 ? "s" : ""}</p>
+            </div>
+            <div class="h-8 w-px bg-border lg:hidden"></div>
+            <div class="lg:text-right">
+              <p class="text-sm font-semibold text-foreground">2 automations</p>
+              <p class="text-xs text-muted-foreground">built per session</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!-- Speaking Events -->
-    <section class="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-      {events.map((event, i) => {
-        const dateObj = new Date(event.event_date);
-        const formatted = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
+    <!-- Speaking Events — editorial, no card box -->
+    <section class="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+      {events.length > 0 ? (
+        <div class="flex flex-col divide-y divide-border/50">
+          {events.map((event, i) => {
+            const dateObj = new Date(event.event_date);
+            const monthYear  = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "short" });
+            const fullDate   = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
 
-        return (
-          <article
-            data-animate
-            style={`transition-delay: ${100 + i * 150}ms`}
-            class="overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm"
-          >
-            <!-- Card header -->
-            <div class="border-b border-border/40 bg-primary/5 px-6 py-4">
-              <div class="flex flex-wrap items-center gap-3">
-                <!-- Provider logos / badge -->
-                <span class="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-background px-3 py-1 text-xs font-semibold text-primary">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
-                  </svg>
-                  Featured Commercial Workshop
-                </span>
-                <span class="inline-flex items-center gap-1.5 rounded-md bg-muted/60 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                  {event.provider}
-                </span>
-              </div>
-            </div>
-
-            <!-- Main content -->
-            <div class="p-6 sm:p-8">
-              <!-- Meta row -->
-              <div
+            return (
+              <article
                 data-animate
-                style={`transition-delay: ${200 + i * 150}ms`}
-                class="mb-4 flex flex-wrap gap-4 text-xs text-muted-foreground"
+                style={`transition-delay: ${80 + i * 80}ms`}
+                class="py-10"
               >
-                <span class="flex items-center gap-1.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>
-                  </svg>
-                  {formatted}
-                </span>
-                <span class="flex items-center gap-1.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                  </svg>
-                  {event.role}
-                </span>
-              </div>
+                <div class="flex flex-col gap-4 sm:grid sm:grid-cols-[5rem_1fr] sm:gap-6">
 
-              <!-- Title -->
-              <h2
-                data-animate
-                style={`transition-delay: ${250 + i * 150}ms`}
-                class="mb-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
-              >
-                {event.title}
-              </h2>
+                  <!-- Date column -->
+                  <div class="hidden sm:flex sm:flex-col sm:items-end sm:pt-1">
+                    <time datetime={event.event_date} class="text-xs text-muted-foreground/60 leading-snug text-right">
+                      {monthYear}
+                    </time>
+                  </div>
 
-              <!-- Description -->
-              <p
-                data-animate
-                style={`transition-delay: ${300 + i * 150}ms`}
-                class="mb-8 text-base leading-relaxed text-muted-foreground"
-              >
-                {event.description}
-              </p>
+                  <!-- Content column -->
+                  <div class="flex flex-col gap-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="inline-flex items-center rounded-md border border-primary/30 bg-primary/5 px-2 py-0.5 text-xs font-medium text-primary">
+                        {event.provider}
+                      </span>
+                      <span class="inline-flex items-center rounded-md border border-border/50 bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                        {event.role}
+                      </span>
+                      <time datetime={event.event_date} class="text-xs text-muted-foreground/60 sm:hidden">
+                        {fullDate}
+                      </time>
+                    </div>
 
-              <!-- Modules -->
-              {event.modules.length > 0 && (
-                <div data-animate style={`transition-delay: ${350 + i * 150}ms`} class="mb-8">
-                  <h3 class="mb-4 text-xs font-semibold uppercase tracking-widest text-primary">
-                    Training Modules
-                  </h3>
-                  <ol class="space-y-4">
-                    {event.modules.map((mod, j) => (
-                      <li
-                        data-animate
-                        style={`transition-delay: ${400 + j * 100}ms`}
-                        class="flex gap-4"
-                      >
-                        <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                          {j + 1}
-                        </span>
-                        <div>
-                          <p class="font-semibold text-foreground">{mod.title}</p>
-                          <p class="mt-1 text-sm leading-relaxed text-muted-foreground">{mod.desc}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
+                    <h2 class="text-xl font-bold tracking-tight text-foreground leading-snug sm:text-2xl">
+                      {event.title}
+                    </h2>
+
+                    <p class="text-sm leading-relaxed text-muted-foreground">
+                      {event.description}
+                    </p>
+
+                    <!-- Training modules -->
+                    {event.modules.length > 0 && (
+                      <div class="mt-2">
+                        <p class="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                          Training Modules
+                        </p>
+                        <ol class="space-y-4">
+                          {event.modules.map((mod, j) => (
+                            <li
+                              data-animate
+                              style={`transition-delay: ${200 + j * 80}ms`}
+                              class="flex gap-4"
+                            >
+                              <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                                {j + 1}
+                              </span>
+                              <div>
+                                <p class="font-semibold text-foreground">{mod.title}</p>
+                                <p class="mt-1 text-sm leading-relaxed text-muted-foreground">{mod.desc}</p>
+                              </div>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    )}
+
+                    <!-- CTA -->
+                    <a
+                      href={event.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="mt-2 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-primary transition-all duration-200 hover:gap-2.5"
+                    >
+                      Daftar Workshop
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+                      </svg>
+                    </a>
+                  </div>
                 </div>
-              )}
-
-              <!-- CTA -->
-              <a
-                data-animate
-                style={`transition-delay: ${500 + i * 150}ms`}
-                href={event.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90 hover:shadow-md hover:shadow-primary/20"
-              >
-                Daftar Workshop
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
-                </svg>
-              </a>
-            </div>
-          </article>
-        );
-      })}
-
-      {events.length === 0 && (
+              </article>
+            );
+          })}
+        </div>
+      ) : (
         <p class="py-20 text-center text-muted-foreground">No events found.</p>
       )}
     </section>

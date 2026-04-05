@@ -22,38 +22,41 @@ const projects = result.rows.map((row) => ({
   description="Production-ready n8n workflow automations built for real-world productivity: invoice extraction, AI chatbots, and multi-persona task orchestration."
 >
   <main>
-    <!-- Page Hero -->
-    <section class="relative overflow-hidden border-b border-border/40 bg-background px-4 py-20 text-center sm:px-6">
-      <!-- Glow -->
-      <div class="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[300px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-3xl"></div>
+    <!-- Page header — left-aligned, no glow, no pill badge -->
+    <section class="border-b border-border/40 bg-background px-4 py-16 sm:px-6">
+      <div class="mx-auto max-w-6xl">
+        <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p class="animate-in fade-in duration-500 mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Automation Blueprints
+            </p>
+            <h1 class="animate-in fade-in slide-in-from-top-4 duration-700 mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+              Production-Ready<br>
+              <span class="text-primary">n8n Workflows</span>
+            </h1>
+            <p class="animate-in fade-in duration-700 [animation-delay:200ms] max-w-xl text-base leading-relaxed text-muted-foreground">
+              Real automations built for real problems. Each blueprint is fully
+              documented with node-by-node structure — no credentials, no fluff.
+            </p>
+          </div>
 
-      <p class="animate-in fade-in duration-500 mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
-        Automation Blueprints
-      </p>
-
-      <h1 class="animate-in fade-in slide-in-from-top-4 duration-700 mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-        Production-Ready<br/>
-        <span class="text-primary">n8n Workflows</span>
-      </h1>
-
-      <p class="animate-in fade-in slide-in-from-bottom-4 duration-700 [animation-delay:300ms] mx-auto max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-        Real automations built for real problems. Each blueprint is fully documented
-        with node-by-node structure — no credentials, no fluff.
-      </p>
-
-      <div class="animate-in fade-in duration-700 [animation-delay:500ms] mt-6 flex items-center justify-center gap-6 text-sm text-muted-foreground">
-        <span class="flex items-center gap-1.5">
-          <span class="h-1.5 w-1.5 rounded-full bg-primary"></span>
-          {projects.length} live blueprints
-        </span>
-        <span class="flex items-center gap-1.5">
-          <span class="h-1.5 w-1.5 rounded-full bg-primary"></span>
-          Structural JSON included
-        </span>
+          <!-- Inline stats — right side on desktop -->
+          <div class="animate-in fade-in duration-700 [animation-delay:300ms] flex shrink-0 items-center gap-8 lg:flex-col lg:items-end lg:gap-3">
+            <div class="lg:text-right">
+              <p class="text-4xl font-bold tracking-tight text-foreground">{projects.length}</p>
+              <p class="text-sm text-muted-foreground">live blueprints</p>
+            </div>
+            <div class="h-8 w-px bg-border lg:hidden"></div>
+            <div class="lg:text-right">
+              <p class="text-sm font-semibold text-foreground">Structural JSON</p>
+              <p class="text-xs text-muted-foreground">included on every card</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Projects Grid -->
+    <!-- Projects grid -->
     <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6">
       {projects.length > 0 ? (
         <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">

@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Hero from "@/components/Hero.astro";
+import LogoStrip from "@/components/LogoStrip.astro";
 import ProjectCard from "@/components/ProjectCard.astro";
 import { turso } from "@/lib/turso";
 
@@ -45,48 +46,78 @@ const categoryColors: Record<string, string> = {
   "Technical Tutorial": "border-violet-400/40 bg-violet-400/10 text-violet-400",
   "Analysis":           "border-amber-400/40 bg-amber-400/10 text-amber-400",
 };
+
+const stats = [
+  { value: String(projects.length), label: "n8n blueprints" },
+  { value: "4",                     label: "publications" },
+  { value: "2×",                    label: "cited as industry SME" },
+  { value: "2",                     label: "research papers" },
+];
 ---
 
 <Layout>
   <main>
     <Hero />
+    <LogoStrip />
+
+    <!-- Credibility stats strip -->
+    <section class="border-b border-border/40 bg-background">
+      <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <dl class="grid grid-cols-2 gap-px sm:grid-cols-4">
+          {stats.map((stat, i) => (
+            <div
+              data-animate
+              style={`transition-delay: ${i * 80}ms`}
+              class="flex flex-col items-center gap-1 py-6 text-center"
+            >
+              <dt class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                {stat.value}
+              </dt>
+              <dd class="text-sm text-muted-foreground">{stat.label}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </section>
+
     <!-- Projects Section -->
     <section class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-      <!-- Section header -->
-      <div class="mb-12 flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p
-            data-animate="fade"
-            class="mb-2 text-xs font-semibold uppercase tracking-widest text-primary"
-          >
-            Automation Blueprints
-          </p>
-          <h2
-            data-animate
-            class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
-          >
-            Production-Ready Workflows
-          </h2>
-          <p
+      <div class="mb-12">
+        <div class="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p
+              data-animate="fade"
+              class="mb-2 text-xs font-semibold uppercase tracking-widest text-primary"
+            >
+              Automation Blueprints
+            </p>
+            <h2
+              data-animate
+              class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
+            >
+              Production-Ready Workflows
+            </h2>
+          </div>
+          <a
             data-animate
             style="transition-delay: 100ms"
-            class="mt-3 max-w-xl text-base text-muted-foreground"
+            href="/projects"
+            class="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-all duration-200 hover:gap-2.5"
           >
-            Real n8n automations built for real problems — each with a
-            full structural blueprint you can inspect and adapt.
-          </p>
+            All blueprints
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+            </svg>
+          </a>
         </div>
-        <a
+        <p
           data-animate
-          style="transition-delay: 150ms"
-          href="/projects"
-          class="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:-translate-y-px hover:bg-accent hover:shadow-sm"
+          style="transition-delay: 80ms"
+          class="max-w-xl text-base text-muted-foreground"
         >
-          View all blueprints
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-          </svg>
-        </a>
+          Real n8n automations built for real problems — each with a
+          full structural blueprint you can inspect and adapt.
+        </p>
       </div>
 
       <!-- Cards grid -->
@@ -97,72 +128,86 @@ const categoryColors: Record<string, string> = {
       </div>
     </section>
 
-    <!-- Writing Section -->
-    <section class="border-t border-border/40 bg-muted/30">
+    <!-- Writing Section — editorial treatment, different from projects -->
+    <section class="border-t border-border/40 bg-muted/20">
       <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-        <div class="mb-10 flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
+
+        <!-- Section header: number + title, left-aligned, no eyebrow label -->
+        <div class="mb-12 grid gap-8 lg:grid-cols-[1fr_auto]">
           <div>
-            <p
+            <span
               data-animate="fade"
-              class="mb-2 text-xs font-semibold uppercase tracking-widest text-primary"
+              class="mb-4 block font-mono text-6xl font-bold leading-none text-border"
+              aria-hidden="true"
             >
-              Writing
-            </p>
+              02
+            </span>
             <h2
               data-animate
               class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
             >
-              Ideas & Analysis
+              Ideas &amp; Analysis
             </h2>
             <p
               data-animate
               style="transition-delay: 100ms"
-              class="mt-3 max-w-xl text-base text-muted-foreground"
+              class="mt-3 max-w-md text-base text-muted-foreground"
             >
-              Strategy, tutorials, and perspectives on AI automation for productivity professionals.
+              Strategy, tutorials, and takes on AI automation
+              for professionals who want to stay ahead.
             </p>
           </div>
-          <a
-            data-animate
-            style="transition-delay: 150ms"
-            href="/writing"
-            class="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:-translate-y-px hover:bg-accent hover:shadow-sm"
-          >
-            All articles
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-            </svg>
-          </a>
+          <div class="flex items-end">
+            <a
+              data-animate
+              style="transition-delay: 150ms"
+              href="/writing"
+              class="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:-translate-y-px hover:bg-accent hover:shadow-sm"
+            >
+              All articles
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+              </svg>
+            </a>
+          </div>
         </div>
 
-        <div class="flex flex-col gap-4">
+        <!-- Article list — editorial row layout -->
+        <div class="flex flex-col divide-y divide-border/50">
           {articles.map((article, i) => {
             const badgeClass = categoryColors[article.category] ?? "border-border/50 bg-muted/60 text-muted-foreground";
-            const dateFormatted = new Date(article.published_date).toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
+            const dateFormatted = new Date(article.published_date).toLocaleDateString("id-ID", { year: "numeric", month: "short" });
             return (
               <article
                 data-animate
-                style={`transition-delay: ${100 + i * 100}ms`}
-                class="group flex flex-col gap-3 rounded-xl border border-border/50 bg-card p-5 shadow-sm transition-shadow duration-200 hover:shadow-md hover:shadow-primary/5 sm:flex-row sm:items-center sm:gap-6 sm:p-6"
+                style={`transition-delay: ${80 + i * 80}ms`}
+                class="group grid grid-cols-[auto_1fr_auto] items-center gap-6 py-6 sm:gap-8"
               >
-                <div class="shrink-0 sm:w-28">
-                  <time datetime={article.published_date} class="text-xs text-muted-foreground/70">{dateFormatted}</time>
-                </div>
-                <div class="flex flex-1 flex-col gap-2">
-                  <span class={`inline-flex w-fit items-center rounded-md border px-2.5 py-0.5 text-xs font-medium ${badgeClass}`}>
+                <!-- Date column -->
+                <time datetime={article.published_date} class="hidden w-20 shrink-0 text-right text-xs text-muted-foreground/60 sm:block">
+                  {dateFormatted}
+                </time>
+
+                <!-- Content -->
+                <div class="flex flex-col gap-2">
+                  <span class={`inline-flex w-fit items-center rounded-md border px-2 py-0.5 text-xs font-medium ${badgeClass}`}>
                     {article.category}
                   </span>
-                  <p class="font-semibold text-foreground transition-colors group-hover:text-primary">{article.title}</p>
+                  <p class="font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
+                    {article.title}
+                  </p>
                 </div>
+
+                <!-- Arrow -->
                 <a
                   href={article.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="shrink-0 inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-all duration-200 hover:gap-2.5"
+                  aria-label={`Read: ${article.title}`}
+                  class="shrink-0 rounded-md p-2 text-muted-foreground/40 transition-all duration-200 hover:bg-accent hover:text-foreground"
                 >
-                  Read
-                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
                   </svg>
                 </a>
               </article>
@@ -175,39 +220,42 @@ const categoryColors: Record<string, string> = {
     <!-- Speaking Section -->
     {speakingEvents.length > 0 && (
       <section class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-        <div class="mb-10 flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div class="mb-10 grid gap-8 lg:grid-cols-[1fr_auto]">
           <div>
-            <p
+            <span
               data-animate="fade"
-              class="mb-2 text-xs font-semibold uppercase tracking-widest text-primary"
+              class="mb-4 block font-mono text-6xl font-bold leading-none text-border"
+              aria-hidden="true"
             >
-              Speaking
-            </p>
+              03
+            </span>
             <h2
               data-animate
               class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
             >
-              Workshops & Training
+              Workshops &amp; Training
             </h2>
             <p
               data-animate
               style="transition-delay: 100ms"
-              class="mt-3 max-w-xl text-base text-muted-foreground"
+              class="mt-3 max-w-md text-base text-muted-foreground"
             >
-              Live sessions where participants build real, production-ready automations from scratch.
+              Live sessions where participants leave with 2 working automations — built from scratch during the workshop.
             </p>
           </div>
-          <a
-            data-animate
-            style="transition-delay: 150ms"
-            href="/speaking"
-            class="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:-translate-y-px hover:bg-accent hover:shadow-sm"
-          >
-            See all sessions
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-            </svg>
-          </a>
+          <div class="flex items-end">
+            <a
+              data-animate
+              style="transition-delay: 150ms"
+              href="/speaking"
+              class="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:-translate-y-px hover:bg-accent hover:shadow-sm"
+            >
+              All sessions
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+              </svg>
+            </a>
+          </div>
         </div>
 
         {speakingEvents.map((event, i) => {
