@@ -1,0 +1,97 @@
+---
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import { turso } from "@/lib/turso";
+
+export const prerender = false;
+
+const { id } = Astro.params;
+let error = "";
+
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  const action = form.get("_action");
+
+  if (action === "delete") {
+    await turso.execute({ sql: "DELETE FROM projects WHERE id = ?", args: [id!] });
+    return Astro.redirect("/admin/projects");
+  }
+
+  const title            = String(form.get("title") ?? "").trim();
+  const slug             = String(form.get("slug") ?? "").trim();
+  const description      = String(form.get("description") ?? "").trim();
+  const json_source      = String(form.get("json_source") ?? "").trim();
+  const stack            = String(form.get("stack") ?? "").trim();
+  const screenshot_url   = String(form.get("screenshot_url") ?? "").trim();
+  const blueprint_snippet = String(form.get("blueprint_snippet") ?? "").trim();
+
+  if (!title || !slug || !description || !json_source || !stack || !screenshot_url || !blueprint_snippet) {
+    error = "Semua field wajib diisi.";
+  } else {
+    await turso.execute({
+      sql: "UPDATE projects SET title=?, slug=?, description=?, json_source=?, stack=?, screenshot_url=?, blueprint_snippet=? WHERE id=?",
+      args: [title, slug, description, json_source, stack, screenshot_url, blueprint_snippet, id!],
+    });
+    return Astro.redirect("/admin/projects");
+  }
+}
+
+const result = await turso.execute({ sql: "SELECT * FROM projects WHERE id = ?", args: [id!] });
+if (!result.rows[0]) return Astro.redirect("/admin/projects");
+
+const p = result.rows[0];
+---
+
+<AdminLayout title="Edit Project">
+  <div class="max-w-2xl">
+    <div class="flex items-center gap-3 mb-6">
+      <a href="/admin/projects" class="text-muted-foreground hover:text-foreground text-sm">← Projects</a>
+      <h1 class="text-xl font-semibold">Edit Project</h1>
+    </div>
+
+    {error && (
+      <div class="mb-4 rounded-md bg-destructive/10 border border-destructive/30 text-destructive text-sm px-4 py-3">{error}</div>
+    )}
+
+    <form method="POST" class="bg-card border border-border rounded-xl p-6 flex flex-col gap-4">
+      <label class="flex flex-col gap-1.5 text-sm">
+        <span class="font-medium">Title</span>
+        <input name="title" type="text" required value={String(p.title)} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+      </label>
+      <label class="flex flex-col gap-1.5 text-sm">
+        <span class="font-medium">Slug</span>
+        <input name="slug" type="text" required value={String(p.slug)} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+      </label>
+      <label class="flex flex-col gap-1.5 text-sm">
+        <span class="font-medium">Description</span>
+        <textarea name="description" required rows="3" class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30 resize-y">{String(p.description)}</textarea>
+      </label>
+      <label class="flex flex-col gap-1.5 text-sm">
+        <span class="font-medium">JSON Source URL</span>
+        <input name="json_source" type="text" required value={String(p.json_source)} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+      </label>
+      <label class="flex flex-col gap-1.5 text-sm">
+        <span class="font-medium">Stack</span>
+        <input name="stack" type="text" required value={String(p.stack)} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+      </label>
+      <label class="flex flex-col gap-1.5 text-sm">
+        <span class="font-medium">Screenshot URL</span>
+        <input name="screenshot_url" type="text" required value={String(p.screenshot_url)} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+      </label>
+      <label class="flex flex-col gap-1.5 text-sm">
+        <span class="font-medium">Blueprint Snippet</span>
+        <textarea name="blueprint_snippet" required rows="4" class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30 resize-y font-mono text-xs">{String(p.blueprint_snippet)}</textarea>
+      </label>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="px-5 py-2 bg-foreground text-background text-sm rounded-md hover:opacity-90 transition-opacity">Save</button>
+        <a href="/admin/projects" class="px-5 py-2 border border-border rounded-md text-sm hover:bg-accent transition-colors">Cancel</a>
+      </div>
+    </form>
+
+    <!-- Delete -->
+    <form method="POST" class="mt-4">
+      <input type="hidden" name="_action" value="delete" />
+      <button type="submit" class="text-sm text-destructive hover:underline underline-offset-2"
+        onclick="return confirm('Delete this project?')">Delete project</button>
+    </form>
+  </div>
+</AdminLayout>

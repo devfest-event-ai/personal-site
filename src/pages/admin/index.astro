@@ -1,0 +1,43 @@
+---
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import { turso } from "@/lib/turso";
+
+export const prerender = false;
+
+const [projects, writing, publications, speaking] = await Promise.all([
+  turso.execute("SELECT COUNT(*) as count FROM projects"),
+  turso.execute("SELECT COUNT(*) as count FROM writing"),
+  turso.execute("SELECT COUNT(*) as count FROM publications"),
+  turso.execute("SELECT COUNT(*) as count FROM speaking"),
+]);
+
+const counts = {
+  projects:     Number(projects.rows[0].count),
+  writing:      Number(writing.rows[0].count),
+  publications: Number(publications.rows[0].count),
+  speaking:     Number(speaking.rows[0].count),
+};
+
+const cards = [
+  { label: "Projects",     count: counts.projects,     href: "/admin/projects" },
+  { label: "Writing",      count: counts.writing,      href: "/admin/writing" },
+  { label: "Publications", count: counts.publications, href: "/admin/publications" },
+  { label: "Speaking",     count: counts.speaking,     href: "/admin/speaking" },
+];
+---
+
+<AdminLayout title="Dashboard">
+  <h1 class="text-xl font-semibold mb-6">Dashboard</h1>
+
+  <div class="grid grid-cols-2 gap-4 max-w-2xl">
+    {cards.map((c) => (
+      <a
+        href={c.href}
+        class="bg-card border border-border rounded-xl p-6 hover:border-foreground/30 transition-colors group"
+      >
+        <p class="text-3xl font-bold text-foreground">{c.count}</p>
+        <p class="text-sm text-muted-foreground mt-1 group-hover:text-foreground transition-colors">{c.label}</p>
+      </a>
+    ))}
+  </div>
+</AdminLayout>
