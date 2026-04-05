@@ -4,13 +4,21 @@ import { turso } from "@/lib/turso";
 
 const result = await turso.execute("SELECT * FROM writing ORDER BY published_date DESC");
 
+function generateSlug(title: string): string {
+  return title.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
 const articles = result.rows.map((row) => ({
   id:             Number(row.id),
   title:          String(row.title),
+  slug:           row.slug ? String(row.slug) : generateSlug(String(row.title)),
   category:       String(row.category),
   description:    String(row.description),
   url:            String(row.url),
   published_date: String(row.published_date),
+  is_external:    row.is_external ? Number(row.is_external) === 1 : false,
 }));
 
 const categoryColors: Record<string, string> = {
@@ -32,7 +40,7 @@ const categoryColors: Record<string, string> = {
           Writing
         </p>
         <h1 class="animate-in fade-in slide-in-from-top-4 duration-700 mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          Ideas on AI &amp;<br>Automation
+          Ideas on AI &<br>Automation
         </h1>
         <p class="animate-in fade-in duration-700 [animation-delay:200ms] max-w-lg text-base leading-relaxed text-muted-foreground">
           Strategy, tutorials, and analysis for professionals building with AI —
@@ -50,6 +58,8 @@ const categoryColors: Record<string, string> = {
             const monthYear = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "short" });
             const fullDate  = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
             const badgeClass = categoryColors[article.category] ?? "border-border/50 bg-muted/60 text-muted-foreground";
+            const detailHref = article.is_external ? article.url : `/writing/${article.slug}`;
+            const isExternalLink = article.is_external;
 
             return (
               <article
@@ -57,7 +67,7 @@ const categoryColors: Record<string, string> = {
                 style={`transition-delay: ${80 + i * 80}ms`}
                 class="group py-8"
               >
-                <div class="flex flex-col gap-3 sm:grid sm:grid-cols-[5rem_1fr] sm:gap-6">
+                <a href={detailHref} target={isExternalLink ? "_blank" : undefined} rel={isExternalLink ? "noopener noreferrer" : undefined} class="flex flex-col gap-3 sm:grid sm:grid-cols-[5rem_1fr] sm:gap-6">
 
                   <!-- Date column -->
                   <div class="hidden sm:flex sm:flex-col sm:items-end sm:pt-1">
@@ -72,6 +82,11 @@ const categoryColors: Record<string, string> = {
                       <span class={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${badgeClass}`}>
                         {article.category}
                       </span>
+                      {isExternalLink && (
+                        <span class="inline-flex items-center rounded-md border border-border/50 bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                          External
+                        </span>
+                      )}
                       <!-- Date on mobile -->
                       <time datetime={article.published_date} class="text-xs text-muted-foreground/60 sm:hidden">
                         {fullDate}
@@ -86,19 +101,22 @@ const categoryColors: Record<string, string> = {
                       {article.description}
                     </p>
 
-                    <a
-                      href={article.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="mt-1 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-primary transition-all duration-200 hover:gap-2.5"
-                    >
-                      Read on LinkedIn
+                    <span class="mt-1 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-primary transition-all duration-200 hover:gap-2.5">
+                      {isExternalLink ? "Read on LinkedIn" : "Read article"}
                       <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+                        {isExternalLink ? (
+                          <>
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+                          </>
+                        ) : (
+                          <>
+                            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                          </>
+                        )}
                       </svg>
-                    </a>
+                    </span>
                   </div>
-                </div>
+                </a>
               </article>
             );
           })}

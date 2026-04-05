@@ -1,32 +1,54 @@
 ---
+export const prerender = false;
+
 import Layout from "@/layouts/Layout.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import DetailNavigation from "@/components/DetailNavigation.astro";
 import { turso } from "@/lib/turso";
 
-const { slug } = Astro.params;
+const { slug: paramSlug } = Astro.params;
 
-if (!slug) {
+if (!paramSlug) {
   return Astro.redirect("/404");
 }
 
-const result = await turso.execute({
-  sql: "SELECT * FROM publications WHERE slug = ?",
-  args: [slug],
-});
+function generateSlug(title: string): string {
+  return title.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
 
-if (result.rows.length === 0) {
+// Try to find by slug first, fallback to title-based matching
+let pubRow: any = null;
+try {
+  const result = await turso.execute({
+    sql: "SELECT * FROM publications WHERE slug = ?",
+    args: [paramSlug],
+  });
+  if (result.rows.length > 0) {
+    pubRow = result.rows[0];
+  }
+} catch {
+  // If slug column doesn't exist, try matching by title
+  const allResult = await turso.execute("SELECT * FROM publications");
+  pubRow = allResult.rows.find((row) => {
+    const rowSlug = row.slug ? String(row.slug) : generateSlug(String(row.title));
+    return rowSlug === paramSlug;
+  }) || null;
+}
+
+if (!pubRow) {
   return Astro.redirect("/404");
 }
 
-const pub = result.rows[0];
-const pubId = Number(pub.id);
-const title = String(pub.title);
-const journal = String(pub.journal);
-const publishedDate = String(pub.published_date);
-const abstract = String(pub.abstract);
-const doiUrl = pub.doi_url ? String(pub.doi_url) : null;
-const type = String(pub.type);
+const pubId = Number(pubRow.id);
+const title = String(pubRow.title);
+const pubSlug = pubRow.slug ? String(pubRow.slug) : generateSlug(title);
+const journal = String(pubRow.journal);
+const publishedDate = String(pubRow.published_date);
+const abstract = String(pubRow.abstract);
+const doiUrl = pubRow.doi_url ? String(pubRow.doi_url) : null;
+const type = String(pubRow.type);
 
 const dateObj = new Date(publishedDate);
 const fullDate = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "long" });
@@ -53,10 +75,10 @@ const allPubs = await turso.execute("SELECT id, title, slug FROM publications OR
 const pubsList = allPubs.rows.map((row) => ({
   id: Number(row.id),
   title: String(row.title),
-  slug: String(row.slug),
+  slug: row.slug ? String(row.slug) : generateSlug(String(row.title)),
 }));
 
-const currentIndex = pubsList.findIndex((p) => p.slug === slug);
+const currentIndex = pubsList.findIndex((p) => p.slug === pubSlug);
 const prevPub = currentIndex > 0 ? pubsList[currentIndex - 1] : null;
 const nextPub = currentIndex < pubsList.length - 1 ? pubsList[currentIndex + 1] : null;
 
@@ -74,7 +96,7 @@ const seo = {
         items={[
           { label: "Home", href: "/" },
           { label: "Publications", href: "/publications" },
-          { label: title, href: `/publications/${slug}` },
+          { label: title, href: `/publications/${pubSlug}` },
         ]}
       />
     </section>

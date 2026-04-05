@@ -1,0 +1,119 @@
+---
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import { db } from "@/db";
+import { contacts } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
+
+export const prerender = false;
+
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  const id = form.get("id");
+  if (id) {
+    await db.delete(contacts).where(eq(contacts.id, Number(id)));
+  }
+  return Astro.redirect("/admin/contacts");
+}
+
+const allContacts = await db
+  .select({
+    id: contacts.id,
+    name: contacts.name,
+    email: contacts.email,
+    subject: contacts.subject,
+    message: contacts.message,
+    submittedAt: contacts.submittedAt,
+  })
+  .from(contacts)
+  .orderBy(desc(contacts.submittedAt));
+---
+
+<AdminLayout title="Contacts">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-semibold">Contacts</h1>
+    <p class="text-sm text-muted-foreground">{allContacts.length} submissions</p>
+  </div>
+
+  <div class="bg-card border border-border rounded-xl overflow-hidden">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-border text-muted-foreground text-left">
+          <th class="px-4 py-3 font-medium">ID</th>
+          <th class="px-4 py-3 font-medium">Name</th>
+          <th class="px-4 py-3 font-medium">Email</th>
+          <th class="px-4 py-3 font-medium">Subject</th>
+          <th class="px-4 py-3 font-medium">Date</th>
+          <th class="px-4 py-3 font-medium">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {allContacts.map((c) => (
+          <tr class="border-b border-border last:border-0 hover:bg-accent/40 transition-colors">
+            <td class="px-4 py-3 text-muted-foreground">{c.id}</td>
+            <td class="px-4 py-3 font-medium">{c.name}</td>
+            <td class="px-4 py-3 text-muted-foreground">{c.email}</td>
+            <td class="px-4 py-3 max-w-48 truncate">{c.subject}</td>
+            <td class="px-4 py-3 text-muted-foreground text-xs">{new Date(c.submittedAt).toLocaleString()}</td>
+            <td class="px-4 py-3 flex items-center gap-2">
+              <button
+                type="button"
+                onclick="showMessage(this)"
+                data-message={c.message}
+                class="text-foreground underline-offset-2 hover:underline cursor-pointer"
+              >
+                View
+              </button>
+              <form method="POST">
+                <input type="hidden" name="id" value={c.id} />
+                <button type="submit" class="text-destructive hover:underline underline-offset-2"
+                  onclick="return confirm('Delete this contact submission?')">Delete</button>
+              </form>
+            </td>
+          </tr>
+        ))}
+        {allContacts.length === 0 && (
+          <tr>
+            <td colspan="6" class="px-4 py-8 text-center text-muted-foreground">No contact submissions yet.</td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Message Modal -->
+  <div id="message-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div class="bg-card border border-border rounded-xl max-w-lg w-full p-6">
+      <h3 class="text-lg font-semibold mb-4">Message</h3>
+      <p id="modal-message-content" class="text-sm text-muted-foreground whitespace-pre-wrap mb-6"></p>
+      <button
+        type="button"
+        onclick="closeMessage()"
+        class="px-4 py-2 bg-foreground text-background text-sm rounded-md hover:opacity-90 transition-opacity"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+
+  <script is:inline>
+    function showMessage(btn) {
+      const message = btn.getAttribute("data-message");
+      const modal = document.getElementById("message-modal");
+      const content = document.getElementById("modal-message-content");
+      content.textContent = message;
+      modal.classList.remove("hidden");
+    }
+
+    function closeMessage() {
+      const modal = document.getElementById("message-modal");
+      modal.classList.add("hidden");
+    }
+
+    // Close modal on backdrop click
+    document.getElementById("message-modal")?.addEventListener("click", function(e) {
+      if (e.target === this) {
+        closeMessage();
+      }
+    });
+  </script>
+</AdminLayout>

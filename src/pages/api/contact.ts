@@ -1,7 +1,10 @@
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { contacts } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import type { APIRoute } from "astro";
 
 const TURNSTILE_SECRET = import.meta.env.TURNSTILE_SECRET_KEY ?? "";
+const RATE_LIMIT_SECONDS = 60;
 
 async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
   const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
@@ -62,13 +65,44 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    await turso.execute(
-      "INSERT INTO contacts (name, email, subject, message) VALUES (?, ?, ?, ?)",
-      [String(name), String(email), String(subject), String(message)]
-    );
+    // Check for duplicate submission (same email within rate limit window)
+    const recentSubmission = await db
+      .select({ submittedAt: contacts.submittedAt })
+      .from(contacts)
+      .where(eq(contacts.email, String(email)))
+      .orderBy(contacts.submittedAt)
+      .limit(1);
+
+    if (recentSubmission.length > 0) {
+      const lastSubmitTime = new Date(recentSubmission[0].submittedAt);
+      const now = new Date();
+      const timeDiff = (now.getTime() - lastSubmitTime.getTime()) / 1000;
+
+      if (timeDiff < RATE_LIMIT_SECONDS) {
+        const retryAfter = Math.ceil(RATE_LIMIT_SECONDS - timeDiff);
+        return new Response(
+          JSON.stringify({
+            error: `You've recently submitted a message. Please wait ${retryAfter} seconds before trying again.`,
+            retryAfter,
+          }),
+          { status: 429, headers: { "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    // Insert using Drizzle ORM
+    await db.insert(contacts).values({
+      name: String(name),
+      email: String(email),
+      subject: String(subject),
+      message: String(message),
+    });
 
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({
+        success: true,
+        retryAfter: RATE_LIMIT_SECONDS,
+      }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {

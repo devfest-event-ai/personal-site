@@ -4,11 +4,12 @@ import { turso } from "@/lib/turso";
 
 export const prerender = false;
 
-const [projects, writing, publications, speaking] = await Promise.all([
+const [projects, writing, publications, speaking, contacts] = await Promise.all([
   turso.execute("SELECT COUNT(*) as count FROM projects"),
   turso.execute("SELECT COUNT(*) as count FROM writing"),
   turso.execute("SELECT COUNT(*) as count FROM publications"),
   turso.execute("SELECT COUNT(*) as count FROM speaking"),
+  turso.execute("SELECT COUNT(*) as count FROM contacts"),
 ]);
 
 const counts = {
@@ -16,6 +17,7 @@ const counts = {
   writing:      Number(writing.rows[0].count),
   publications: Number(publications.rows[0].count),
   speaking:     Number(speaking.rows[0].count),
+  contacts:     Number(contacts.rows[0].count),
 };
 
 const cards = [
@@ -23,6 +25,7 @@ const cards = [
   { label: "Writing",      count: counts.writing,      href: "/admin/writing" },
   { label: "Publications", count: counts.publications, href: "/admin/publications" },
   { label: "Speaking",     count: counts.speaking,     href: "/admin/speaking" },
+  { label: "Contacts",     count: counts.contacts,     href: "/admin/contacts" },
 ];
 ---
 

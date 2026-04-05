@@ -1,33 +1,55 @@
 ---
+export const prerender = false;
+
 import Layout from "@/layouts/Layout.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import DetailNavigation from "@/components/DetailNavigation.astro";
 import { turso } from "@/lib/turso";
 
-const { slug } = Astro.params;
+const { slug: paramSlug } = Astro.params;
 
-if (!slug) {
+if (!paramSlug) {
   return Astro.redirect("/404");
 }
 
-const result = await turso.execute({
-  sql: "SELECT * FROM speaking WHERE slug = ?",
-  args: [slug],
-});
+function generateSlug(title: string): string {
+  return title.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
 
-if (result.rows.length === 0) {
+// Try to find by slug first, fallback to title-based matching
+let eventRow: any = null;
+try {
+  const result = await turso.execute({
+    sql: "SELECT * FROM speaking WHERE slug = ?",
+    args: [paramSlug],
+  });
+  if (result.rows.length > 0) {
+    eventRow = result.rows[0];
+  }
+} catch {
+  // If slug column doesn't exist, try matching by title
+  const allResult = await turso.execute("SELECT * FROM speaking");
+  eventRow = allResult.rows.find((row) => {
+    const rowSlug = row.slug ? String(row.slug) : generateSlug(String(row.title));
+    return rowSlug === paramSlug;
+  }) || null;
+}
+
+if (!eventRow) {
   return Astro.redirect("/404");
 }
 
-const event = result.rows[0];
-const eventId = Number(event.id);
-const title = String(event.title);
-const provider = String(event.provider);
-const eventDate = String(event.event_date);
-const role = String(event.role);
-const description = String(event.description);
-const link = String(event.link);
-const modulesStr = event.modules ? String(event.modules) : "[]";
+const eventId = Number(eventRow.id);
+const title = String(eventRow.title);
+const eventSlug = eventRow.slug ? String(eventRow.slug) : generateSlug(title);
+const provider = String(eventRow.provider);
+const eventDate = String(eventRow.event_date);
+const role = String(eventRow.role);
+const description = String(eventRow.description);
+const link = String(eventRow.link);
+const modulesStr = eventRow.modules ? String(eventRow.modules) : "[]";
 
 let modules: { title: string; desc: string }[] = [];
 try {
@@ -38,17 +60,16 @@ try {
 
 const dateObj = new Date(eventDate);
 const fullDate = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
-const monthYear = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "short" });
 
 // Get prev/next events
 const allEvents = await turso.execute("SELECT id, title, slug FROM speaking ORDER BY id ASC");
 const eventsList = allEvents.rows.map((row) => ({
   id: Number(row.id),
   title: String(row.title),
-  slug: String(row.slug),
+  slug: row.slug ? String(row.slug) : generateSlug(String(row.title)),
 }));
 
-const currentIndex = eventsList.findIndex((e) => e.slug === slug);
+const currentIndex = eventsList.findIndex((e) => e.slug === eventSlug);
 const prevEvent = currentIndex > 0 ? eventsList[currentIndex - 1] : null;
 const nextEvent = currentIndex < eventsList.length - 1 ? eventsList[currentIndex + 1] : null;
 
@@ -66,7 +87,7 @@ const seo = {
         items={[
           { label: "Home", href: "/" },
           { label: "Speaking", href: "/speaking" },
-          { label: title, href: `/speaking/${slug}` },
+          { label: title, href: `/speaking/${eventSlug}` },
         ]}
       />
     </section>

@@ -1,37 +1,52 @@
 ---
+export const prerender = false;
+
 import Layout from "@/layouts/Layout.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import DetailNavigation from "@/components/DetailNavigation.astro";
 import ArticleContent from "@/components/ArticleContent.astro";
 import { turso } from "@/lib/turso";
 
-const { slug } = Astro.params;
+const { slug: paramSlug } = Astro.params;
 
-if (!slug) {
+if (!paramSlug) {
   return Astro.redirect("/404");
 }
 
-const result = await turso.execute({
-  sql: "SELECT * FROM writing WHERE slug = ?",
-  args: [slug],
-});
+let articleRow: any = null;
+try {
+  const result = await turso.execute({
+    sql: "SELECT * FROM writing WHERE slug = ?",
+    args: [paramSlug],
+  });
+  if (result.rows.length > 0) {
+    articleRow = result.rows[0];
+  }
+} catch {
+  // If slug column doesn't exist, try matching by title
+  const allResult = await turso.execute("SELECT * FROM writing");
+  articleRow = allResult.rows.find((row) => {
+    const rowSlug = row.slug ? String(row.slug) : String(row.title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return rowSlug === paramSlug;
+  }) || null;
+}
 
-if (result.rows.length === 0) {
+if (!articleRow) {
   return Astro.redirect("/404");
 }
 
-const article = result.rows[0];
-const articleId = Number(article.id);
-const title = String(article.title);
-const category = String(article.category);
-const description = String(article.description);
-const url = String(article.url);
-const publishedDate = String(article.published_date);
-const content = article.content ? String(article.content) : null;
-const coverImage = article.cover_image ? String(article.cover_image) : null;
-const readingTime = article.reading_time ? Number(article.reading_time) : null;
-const tagsStr = article.tags ? String(article.tags) : null;
-const isExternal = Number(article.is_external) === 1;
+const articleId = Number(articleRow.id);
+const title = String(articleRow.title);
+const articleSlug = articleRow.slug ? String(articleRow.slug) : title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const category = String(articleRow.category);
+const description = String(articleRow.description);
+const url = String(articleRow.url);
+const publishedDate = String(articleRow.published_date);
+const content = articleRow.content ? String(articleRow.content) : null;
+const coverImage = articleRow.cover_image ? String(articleRow.cover_image) : null;
+const readingTime = articleRow.reading_time ? Number(articleRow.reading_time) : null;
+const tagsStr = articleRow.tags ? String(articleRow.tags) : null;
+const isExternal = articleRow.is_external ? Number(articleRow.is_external) === 1 : false;
 
 let tags: string[] = [];
 if (tagsStr) {
@@ -58,10 +73,10 @@ const allArticles = await turso.execute("SELECT id, title, slug FROM writing ORD
 const articlesList = allArticles.rows.map((row) => ({
   id: Number(row.id),
   title: String(row.title),
-  slug: String(row.slug),
+  slug: row.slug ? String(row.slug) : String(row.title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
 }));
 
-const currentIndex = articlesList.findIndex((a) => a.slug === slug);
+const currentIndex = articlesList.findIndex((a) => a.slug === articleSlug);
 const prevArticle = currentIndex > 0 ? articlesList[currentIndex - 1] : null;
 const nextArticle = currentIndex < articlesList.length - 1 ? articlesList[currentIndex + 1] : null;
 
@@ -79,7 +94,7 @@ const seo = {
         items={[
           { label: "Home", href: "/" },
           { label: "Writing", href: "/writing" },
-          { label: title, href: `/writing/${slug}` },
+          { label: title, href: `/writing/${articleSlug}` },
         ]}
       />
     </section>

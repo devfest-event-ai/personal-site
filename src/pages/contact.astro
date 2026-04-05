@@ -194,6 +194,37 @@ const turnstileSiteKey = import.meta.env.TURNSTILE_SITE_KEY ?? "1x00000000000000
     const btnSpinner = document.getElementById("btn-spinner") as unknown as SVGSVGElement;
 
     let turnstileToken = "";
+    let disableTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function startDisableTimer(seconds: number) {
+      // Clear any existing timer
+      if (disableTimer) {
+        clearTimeout(disableTimer);
+      }
+
+      submitBtn.disabled = true;
+      let remaining = seconds;
+
+      const updateButtonText = () => {
+        btnText.textContent = `Sent! Wait ${remaining}s`;
+      };
+      updateButtonText();
+
+      disableTimer = setInterval(() => {
+        remaining--;
+        if (remaining <= 0) {
+          if (disableTimer) {
+            clearInterval(disableTimer);
+            disableTimer = null;
+          }
+          // Re-enable button only if Turnstile token is valid
+          submitBtn.disabled = !turnstileToken;
+          btnText.textContent = "Send message";
+        } else {
+          updateButtonText();
+        }
+      }, 1000);
+    }
 
     turnstileScript.onload = () => {
       (window as any).turnstile?.render("#cf-turnstile", {
@@ -201,7 +232,10 @@ const turnstileSiteKey = import.meta.env.TURNSTILE_SITE_KEY ?? "1x00000000000000
         theme: "auto",
         callback: (token: string) => {
           turnstileToken = token;
-          submitBtn.disabled = false;
+          // Only enable if not in disable period
+          if (!disableTimer) {
+            submitBtn.disabled = false;
+          }
         },
         "expired-callback": () => {
           turnstileToken = "";
@@ -249,23 +283,38 @@ const turnstileSiteKey = import.meta.env.TURNSTILE_SITE_KEY ?? "1x00000000000000
           form.reset();
           turnstileToken = "";
           (window as any).turnstile?.reset?.();
+
+          // Start 60-second disable timer
+          const retryAfter = result.retryAfter || 60;
+          startDisableTimer(retryAfter);
         } else {
           messageEl.textContent = result.error || "Failed to submit form. Please try again.";
           messageEl.className = "rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive";
           messageEl.classList.remove("hidden");
           turnstileToken = "";
           (window as any).turnstile?.reset?.();
+
+          // If rate limited, start disable timer
+          if (result.retryAfter) {
+            startDisableTimer(result.retryAfter);
+          }
         }
       } catch {
         messageEl.textContent = "Network error. Please check your connection and try again.";
         messageEl.className = "rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive";
         messageEl.classList.remove("hidden");
       } finally {
-        // Re-enable only if Turnstile token is still valid
-        submitBtn.disabled = !turnstileToken;
-        btnText.textContent = "Send message";
-        btnIcon.classList.remove("hidden");
-        btnSpinner.classList.add("hidden");
+        // Only reset loading state if not starting disable timer
+        if (!disableTimer) {
+          submitBtn.disabled = !turnstileToken;
+          btnText.textContent = "Send message";
+          btnIcon.classList.remove("hidden");
+          btnSpinner.classList.add("hidden");
+        } else {
+          // Hide spinner and icon during disable period
+          btnIcon.classList.add("hidden");
+          btnSpinner.classList.add("hidden");
+        }
       }
     });
   </script>
