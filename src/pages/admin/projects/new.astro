@@ -70,11 +70,15 @@ if (Astro.request.method === "POST") {
     <form method="POST" class="bg-card border border-border rounded-xl p-6 flex flex-col gap-4">
       <label class="flex flex-col gap-1.5 text-sm">
         <span class="font-medium">Title</span>
-        <input name="title" type="text" required class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+        <input id="title" name="title" type="text" required class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
       </label>
       <label class="flex flex-col gap-1.5 text-sm">
         <span class="font-medium">Slug</span>
-        <input name="slug" type="text" required class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+        <div class="flex gap-2">
+          <input id="slug-input" name="slug" type="text" required class="flex-1 px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+          <button type="button" id="slug-regen" class="px-3 py-2 rounded-md border border-border bg-accent text-foreground text-xs font-medium hover:bg-accent/70 transition-colors whitespace-nowrap">Generate</button>
+        </div>
+        <span class="text-xs text-muted-foreground">Auto-generated dari judul. Klik Generate untuk buat ulang.</span>
       </label>
       <RichEditor name="description" label="Description" required id="description" rows={4} />
       <label class="flex flex-col gap-1.5 text-sm">
@@ -149,6 +153,41 @@ if (Astro.request.method === "POST") {
 </AdminLayout>
 
 <script>
+// Slug auto-generation
+const titleInput = document.getElementById("title") as HTMLInputElement | null;
+const slugInput  = document.getElementById("slug-input") as HTMLInputElement;
+const regenBtn   = document.getElementById("slug-regen") as HTMLButtonElement;
+
+function toSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+function generateSlug(base: string): string {
+  return toSlug(base);
+}
+
+let slugManuallyEdited = false;
+
+titleInput?.addEventListener("input", () => {
+  if (!slugManuallyEdited) {
+    slugInput.value = generateSlug(titleInput.value);
+  }
+});
+
+slugInput.addEventListener("input", () => {
+  slugManuallyEdited = true;
+});
+
+regenBtn.addEventListener("click", () => {
+  slugInput.value = generateSlug(titleInput?.value ?? "");
+  slugManuallyEdited = false;
+});
+
 const fileInput = document.getElementById("ss-file-input") as HTMLInputElement;
 const urlInput  = document.getElementById("ss-url") as HTMLInputElement;
 const dropZone  = document.getElementById("ss-drop-zone") as HTMLDivElement;

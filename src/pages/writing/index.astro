@@ -1,4 +1,5 @@
 ---
+import type { TransitionDirectionalAnimations } from "astro";
 import { desc } from "drizzle-orm";
 import { db } from "@/db";
 import { writing } from "@/db/schema";
@@ -32,6 +33,19 @@ const categoryColors: Record<string, string> = {
   "Technical Tutorial": "border-violet-400/40 bg-violet-400/10 text-violet-400",
   Analysis: "border-amber-400/40 bg-amber-400/10 text-amber-400",
 };
+
+const fadeBack = {
+  old: { name: "vt-out", duration: "0.15s", easing: "ease-in",  fillMode: "both" },
+  new: { name: "vt-in",  duration: "0.2s",  easing: "ease-out", fillMode: "both" },
+};
+const animDown: TransitionDirectionalAnimations = {
+  forwards:  { old: { name: "vt-out",  duration: "0.15s", easing: "ease-in",  fillMode: "both" }, new: { name: "vt-down", duration: "0.35s", easing: "ease-out", fillMode: "both" } },
+  backwards: fadeBack,
+};
+const animUp0: TransitionDirectionalAnimations = {
+  forwards:  { old: { name: "vt-out", duration: "0.15s", easing: "ease-in",  fillMode: "both" }, new: { name: "vt-up", duration: "0.45s", easing: "ease-out", fillMode: "both" } },
+  backwards: fadeBack,
+};
 ---
 
 <Layout
@@ -39,16 +53,22 @@ const categoryColors: Record<string, string> = {
   description="Articles on AI strategy, automation engineering, and curriculum design — written for productivity professionals and AI practitioners."
 >
   <main>
-    <!-- Page header — left-aligned, editorial, no glow, no pill badge -->
-    <section class="border-b border-border/40 bg-background px-4 py-16 sm:px-6">
+    <!-- Page header -->
+    <section
+      transition:animate={animDown}
+      class="border-b border-border/40 bg-background px-4 py-16 sm:px-6"
+    >
       <div class="mx-auto max-w-4xl">
-        <p class="animate-in fade-in duration-500 mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        <p class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Writing
         </p>
-        <h1 class="animate-in fade-in slide-in-from-top-4 duration-700 mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+        <h1
+          transition:name="writing-heading"
+          class="mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl"
+        >
           Ideas on AI &<br>Automation
         </h1>
-        <p class="animate-in fade-in duration-700 [animation-delay:200ms] max-w-lg text-base leading-relaxed text-muted-foreground">
+        <p class="max-w-lg text-base leading-relaxed text-muted-foreground">
           Strategy, tutorials, and analysis for professionals building with AI —
           from curriculum design to production workflow automation.
         </p>
@@ -56,7 +76,10 @@ const categoryColors: Record<string, string> = {
     </section>
 
     <!-- Articles — editorial list, no card boxes -->
-    <section class="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+    <section
+      transition:animate={animUp0}
+      class="mx-auto max-w-4xl px-4 py-12 sm:px-6"
+    >
       {articles.length > 0 ? (
         <div class="flex flex-col divide-y divide-border/50">
           {articles.map((article, i) => {
@@ -99,7 +122,10 @@ const categoryColors: Record<string, string> = {
                       </time>
                     </div>
 
-                    <h2 class="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary leading-snug">
+                    <h2
+                      transition:name={`writing-title-${article.slug}`}
+                      class="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary leading-snug"
+                    >
                       {article.title}
                     </h2>
 

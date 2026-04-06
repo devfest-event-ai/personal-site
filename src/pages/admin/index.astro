@@ -6,6 +6,7 @@ import {
   projects,
   publications,
   speaking,
+  stats,
   writing,
 } from "@/db/schema";
 import AdminLayout from "@/layouts/AdminLayout.astro";
@@ -19,13 +20,14 @@ if (!session) {
   return Astro.redirect("/admin/login");
 }
 
-const [projectCount, writingCount, pubCount, speakingCount, contactCount] =
+const [projectCount, writingCount, pubCount, speakingCount, contactCount, statsCount] =
   await Promise.all([
     db.select({ count: count() }).from(projects),
     db.select({ count: count() }).from(writing),
     db.select({ count: count() }).from(publications),
     db.select({ count: count() }).from(speaking),
     db.select({ count: count() }).from(contacts),
+    db.select({ count: count() }).from(stats),
   ]);
 
 const counts = {
@@ -34,6 +36,7 @@ const counts = {
   publications: pubCount[0]?.count ?? 0,
   speaking: speakingCount[0]?.count ?? 0,
   contacts: contactCount[0]?.count ?? 0,
+  stats: statsCount[0]?.count ?? 0,
 };
 
 const cards = [
@@ -46,6 +49,7 @@ const cards = [
   },
   { label: "Speaking", count: counts.speaking, href: "/admin/speaking" },
   { label: "Contacts", count: counts.contacts, href: "/admin/contacts" },
+  { label: "Home Stats", count: counts.stats, href: "/admin/stats" },
 ];
 ---
 

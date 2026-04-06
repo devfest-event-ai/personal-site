@@ -51,6 +51,13 @@ export const speaking = sqliteTable("speaking", {
   modules: text("modules").notNull(),
 });
 
+export const stats = sqliteTable("stats", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  value: text("value").notNull(),
+  label: text("label").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
 export const contacts = sqliteTable("contacts", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),

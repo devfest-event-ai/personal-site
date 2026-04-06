@@ -41,6 +41,7 @@ const userName = session?.user?.name ?? session?.user?.email ?? "Admin";
       <nav class="flex-1 px-3 py-4 flex flex-col gap-1 text-sm">
         {[
           { href: "/admin", label: "Dashboard" },
+          { href: "/admin/stats", label: "Stats" },
           { href: "/admin/projects", label: "Projects" },
           { href: "/admin/writing", label: "Writing" },
           { href: "/admin/publications", label: "Publications" },

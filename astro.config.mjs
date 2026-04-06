@@ -1,5 +1,4 @@
 import netlify from "@astrojs/netlify";
-import partytown from "@astrojs/partytown";
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 // @ts-check
@@ -9,7 +8,7 @@ import icon from "astro-icon";
 // https://astro.build/config
 export default defineConfig({
   output: "server",
-  integrations: [icon(), partytown(), react()],
+  integrations: [icon(), react()],
 
   vite: {
     plugins: [tailwindcss()],

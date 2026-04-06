@@ -1,4 +1,5 @@
 ---
+import type { TransitionDirectionalAnimations } from "astro";
 import { asc } from "drizzle-orm";
 import ProjectCard from "@/components/ProjectCard.astro";
 import { db } from "@/db";
@@ -20,6 +21,19 @@ const projects = result.map((row) => ({
   screenshot_url: String(row.screenshotUrl),
   blueprint_snippet: String(row.blueprintSnippet),
 }));
+
+const fadeBack = {
+  old: { name: "vt-out", duration: "0.15s", easing: "ease-in",  fillMode: "both" },
+  new: { name: "vt-in",  duration: "0.2s",  easing: "ease-out", fillMode: "both" },
+};
+const animDown: TransitionDirectionalAnimations = {
+  forwards:  { old: { name: "vt-out",  duration: "0.15s", easing: "ease-in",  fillMode: "both" }, new: { name: "vt-down", duration: "0.35s", easing: "ease-out", fillMode: "both" } },
+  backwards: fadeBack,
+};
+const animUp0: TransitionDirectionalAnimations = {
+  forwards:  { old: { name: "vt-out", duration: "0.15s", easing: "ease-in",  fillMode: "both" }, new: { name: "vt-up", duration: "0.45s", easing: "ease-out", fillMode: "both" } },
+  backwards: fadeBack,
+};
 ---
 
 <Layout
@@ -27,26 +41,32 @@ const projects = result.map((row) => ({
   description="Production-ready n8n workflow automations built for real-world productivity: invoice extraction, AI chatbots, and multi-persona task orchestration."
 >
   <main>
-    <!-- Page header — left-aligned, no glow, no pill badge -->
-    <section class="border-b border-border/40 bg-background px-4 py-16 sm:px-6">
-      <div class="mx-auto max-w-6xl">
+    <!-- Page header -->
+    <section
+      transition:animate={animDown}
+      class="border-b border-border/40 bg-background px-4 py-16 sm:px-6"
+    >
+      <div class="mx-auto max-w-4xl">
         <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p class="animate-in fade-in duration-500 mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            <p class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               Automation Workflows
             </p>
-            <h1 class="animate-in fade-in slide-in-from-top-4 duration-700 mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+            <h1
+              transition:name="projects-heading"
+              class="mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl"
+            >
               Production-Ready<br>
               <span class="text-primary">n8n Workflows</span>
             </h1>
-            <p class="animate-in fade-in duration-700 [animation-delay:200ms] max-w-xl text-base leading-relaxed text-muted-foreground">
+            <p class="max-w-xl text-base leading-relaxed text-muted-foreground">
               Real automations built for real problems. Each workflow is fully
               documented with node-by-node structure — no credentials, no fluff.
             </p>
           </div>
 
           <!-- Inline stats — right side on desktop -->
-          <div class="animate-in fade-in duration-700 [animation-delay:300ms] flex shrink-0 items-center gap-8 lg:flex-col lg:items-end lg:gap-3">
+          <div class="flex shrink-0 items-center gap-8 lg:flex-col lg:items-end lg:gap-3">
             <div class="lg:text-right">
               <p class="text-4xl font-bold tracking-tight text-foreground">{projects.length}</p>
               <p class="text-sm text-muted-foreground">live workflows</p>
@@ -62,7 +82,10 @@ const projects = result.map((row) => ({
     </section>
 
     <!-- Projects grid -->
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+    <section
+      transition:animate={animUp0}
+      class="mx-auto max-w-4xl px-4 py-16 sm:px-6"
+    >
       {projects.length > 0 ? (
         <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project, i) => (

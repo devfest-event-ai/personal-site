@@ -4,13 +4,14 @@ import Hero from "@/components/Hero.astro";
 import LogoStrip from "@/components/LogoStrip.astro";
 import ProjectCard from "@/components/ProjectCard.astro";
 import { db } from "@/db";
-import { projects, speaking, writing } from "@/db/schema";
+import { projects, speaking, stats as statsTable, writing } from "@/db/schema";
 import Layout from "@/layouts/Layout.astro";
 
-const [projectsRaw, writingResult, speakingResult] = await Promise.all([
+const [projectsRaw, writingResult, speakingResult, statsResult] = await Promise.all([
   db.select().from(projects).orderBy(asc(projects.id)),
   db.select().from(writing).orderBy(desc(writing.publishedDate)).limit(3),
   db.select().from(speaking).orderBy(asc(speaking.id)).limit(1),
+  db.select().from(statsTable).orderBy(asc(statsTable.sortOrder), asc(statsTable.id)),
 ]);
 
 const projectList = projectsRaw.map((row) => ({
@@ -49,12 +50,14 @@ const categoryColors: Record<string, string> = {
   Analysis: "border-amber-400/40 bg-amber-400/10 text-amber-400",
 };
 
-const stats = [
-  { value: String(projectList.length), label: "n8n workflows" },
-  { value: "4", label: "publications" },
-  { value: "2×", label: "cited as industry SME" },
-  { value: "2", label: "research papers" },
-];
+const stats = statsResult.length > 0
+  ? statsResult.map((row) => ({ value: String(row.value), label: String(row.label) }))
+  : [
+      { value: String(projectList.length), label: "n8n workflows" },
+      { value: "4", label: "publications" },
+      { value: "2×", label: "cited as industry SME" },
+      { value: "2", label: "research papers" },
+    ];
 ---
 
 <Layout>
@@ -64,12 +67,12 @@ const stats = [
     <!-- Credibility stats strip -->
     <section class="border-b border-border/40 bg-background">
       <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <dl class="grid grid-cols-2 gap-px sm:grid-cols-4">
+        <dl class="flex flex-wrap justify-center gap-px sm:grid sm:grid-cols-4">
           {stats.map((stat, i) => (
             <div
               data-animate
               style={`transition-delay: ${i * 80}ms`}
-              class="flex flex-col items-center gap-1 py-6 text-center"
+              class="flex w-1/2 flex-col items-center gap-1 py-6 text-center sm:w-auto"
             >
               <dt class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                 {stat.value}
@@ -94,6 +97,7 @@ const stats = [
             </p>
             <h2
               data-animate
+              transition:name="projects-heading"
               class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
             >
               Production-Ready Workflows
@@ -145,6 +149,7 @@ const stats = [
             </span>
             <h2
               data-animate
+              transition:name="writing-heading"
               class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
             >
               Ideas &amp; Analysis
@@ -232,6 +237,7 @@ const stats = [
             </span>
             <h2
               data-animate
+              transition:name="speaking-heading"
               class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
             >
               Workshops &amp; Training

@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "@astrojs/netlify": "^7.0.6",
-    "@astrojs/partytown": "^2.1.6",
     "@astrojs/react": "^5.0.3",
     "@libsql/client": "^0.17.2",
     "@nuasite/agent-summary": "^0.18.1",

@@ -29,6 +29,20 @@ const staggerDelay = index * 80;
 const hasScreenshot = Boolean(
   project.screenshot_url?.trim() && project.screenshot_url !== "null",
 );
+
+// Strip HTML tags and truncate for card preview
+const plainDescription = project.description
+  .replace(/<[^>]*>/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
+const shortDescription =
+  plainDescription.length > 160
+    ? `${plainDescription.slice(0, 160).trimEnd()}…`
+    : plainDescription;
+
+const imgName = `proj-img-${project.slug}`;
+const titleName = `proj-title-${project.slug}`;
+const stackName = `proj-stack-${project.slug}`;
 ---
 
 <article
@@ -48,6 +62,7 @@ const hasScreenshot = Boolean(
         ></div>
 
         <img
+          transition:name={imgName}
           src={project.screenshot_url}
           alt={`${project.title} workflow canvas`}
           loading="lazy"
@@ -71,7 +86,10 @@ const hasScreenshot = Boolean(
       </>
     ) : (
       <!-- No URL — static placeholder -->
-      <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-muted/60 px-4 text-center">
+      <div
+        transition:name={imgName}
+        class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-muted/60 px-4 text-center"
+      >
         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground/30">
           <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/><circle cx="15" cy="15" r="1" fill="currentColor"/>
         </svg>
@@ -83,18 +101,22 @@ const hasScreenshot = Boolean(
 
   <!-- Content -->
   <div class="flex flex-1 flex-col gap-4 p-6">
-    <!-- Title (clickable) -->
-    <a href={`/projects/${project.slug}`} class="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
+    <!-- Title (clickable) — shared element transition with detail page -->
+    <a
+      href={`/projects/${project.slug}`}
+      transition:name={titleName}
+      class="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary"
+    >
       {project.title}
     </a>
 
     <!-- Description -->
-    <p class="flex-1 text-sm leading-relaxed text-muted-foreground">
-      {project.description}
+    <p class="flex-1 text-sm leading-relaxed text-muted-foreground line-clamp-3">
+      {shortDescription}
     </p>
 
-    <!-- Stack badges -->
-    <div class="flex flex-wrap gap-1.5">
+    <!-- Stack badges — shared element transition with detail page -->
+    <div transition:name={stackName} class="flex flex-wrap gap-1.5">
       {stackTags.map((tag) => (
         <span class="inline-flex items-center rounded-md border border-border/50 bg-muted/60 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
           {tag}
