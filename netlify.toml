@@ -5,6 +5,8 @@
 [build.environment]
   NODE_VERSION = "22"
   PNPM_VERSION = "9"
+  # BETTER_AUTH_URL is a public URL (not a secret), safe to appear in SSR bundle
+  SECRETS_SCAN_OMIT_KEYS = "BETTER_AUTH_URL"
 
 [[headers]]
   for = "/*"

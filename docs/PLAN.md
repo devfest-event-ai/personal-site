@@ -138,7 +138,7 @@ Insert the 3 projects, 3 writing articles, 2 publications, 1 speaking event per 
 
 ## Phase 0 — Infrastructure ✅ DONE
 
-- Turso DB: `porto-ibu` (group `ibu`) — URL: `libsql://porto-ibu-hasban-fardani.aws-ap-northeast-1.turso.io`
+- Turso DB: `porto-ibu` (group `ibu`) — URL: `libsql://[redacted].turso.io`
 - Schema created, all 4 tables seeded (projects=3, writing=3, publications=4, speaking=1)
 - `.env` populated with real credentials (gitignored)
 - `src/lib/turso.ts` singleton created
