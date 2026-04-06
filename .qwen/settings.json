@@ -4,7 +4,9 @@
       "Bash(git add *)",
       "Bash(git commit *)",
       "Bash(pnpm run *)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(bun *)",
+      "Bash(bunx *)"
     ]
   },
   "$version": 3

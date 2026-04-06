@@ -1,21 +1,24 @@
+import type { APIRoute } from "astro";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { contacts } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import type { APIRoute } from "astro";
 
 const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY ?? "";
 const RATE_LIMIT_SECONDS = 60;
 
 async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
-  const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      secret: TURNSTILE_SECRET,
-      response: token,
-      remoteip: ip,
-    }),
-  });
+  const res = await fetch(
+    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        secret: TURNSTILE_SECRET,
+        response: token,
+        remoteip: ip,
+      }),
+    },
+  );
   const data = await res.json();
   return data.success === true;
 }
@@ -32,14 +35,14 @@ export const POST: APIRoute = async ({ request }) => {
     if (!name || !email || !subject || !message) {
       return new Response(
         JSON.stringify({ error: "All fields are required" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }
 
     if (!turnstileToken || typeof turnstileToken !== "string") {
       return new Response(
         JSON.stringify({ error: "CAPTCHA verification required" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }
 
@@ -53,16 +56,16 @@ export const POST: APIRoute = async ({ request }) => {
     if (!isValid) {
       return new Response(
         JSON.stringify({ error: "CAPTCHA verification failed" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(String(email))) {
-      return new Response(
-        JSON.stringify({ error: "Invalid email format" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Invalid email format" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Check for duplicate submission (same email within rate limit window)
@@ -85,7 +88,7 @@ export const POST: APIRoute = async ({ request }) => {
             error: `You've recently submitted a message. Please wait ${retryAfter} seconds before trying again.`,
             retryAfter,
           }),
-          { status: 429, headers: { "Content-Type": "application/json" } }
+          { status: 429, headers: { "Content-Type": "application/json" } },
         );
       }
     }
@@ -103,13 +106,13 @@ export const POST: APIRoute = async ({ request }) => {
         success: true,
         retryAfter: RATE_LIMIT_SECONDS,
       }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      { status: 200, headers: { "Content-Type": "application/json" } },
     );
   } catch (error) {
     console.error("Contact submission error:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to submit form" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Failed to submit form" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 };

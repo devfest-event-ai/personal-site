@@ -9,13 +9,21 @@ export const auth = betterAuth({
     schema,
   }),
 
-  secret: process.env.BETTER_AUTH_SECRET,
-  baseURL: process.env.BETTER_AUTH_URL,
+  secret:
+    process.env.BETTER_AUTH_SECRET ??
+    (import.meta.env.BETTER_AUTH_SECRET as string),
+  baseURL:
+    process.env.BETTER_AUTH_URL ??
+    (import.meta.env.BETTER_AUTH_URL as string),
 
   socialProviders: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientId:
+        process.env.GOOGLE_CLIENT_ID ??
+        (import.meta.env.GOOGLE_CLIENT_ID as string),
+      clientSecret:
+        process.env.GOOGLE_CLIENT_SECRET ??
+        (import.meta.env.GOOGLE_CLIENT_SECRET as string),
     },
   },
 

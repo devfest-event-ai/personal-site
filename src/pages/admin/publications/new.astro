@@ -1,12 +1,15 @@
 ---
-import AdminLayout from "@/layouts/AdminLayout.astro";
 import RichEditor from "@/components/RichEditor.astro";
 import { db } from "@/db";
 import { publications } from "@/db/schema";
+import AdminLayout from "@/layouts/AdminLayout.astro";
 import { requireAdminSession } from "@/lib/admin-auth";
 
 function makeSlug(title: string) {
-  return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 export const prerender = false;
@@ -21,12 +24,12 @@ let error = "";
 
 if (Astro.request.method === "POST") {
   const form = await Astro.request.formData();
-  const title          = String(form.get("title") ?? "").trim();
-  const journal        = String(form.get("journal") ?? "").trim();
-  const publishedDate  = String(form.get("published_date") ?? "").trim();
-  const abstract       = String(form.get("abstract") ?? "").trim();
-  const doiUrl         = String(form.get("doi_url") ?? "").trim();
-  const type           = String(form.get("type") ?? "").trim();
+  const title = String(form.get("title") ?? "").trim();
+  const journal = String(form.get("journal") ?? "").trim();
+  const publishedDate = String(form.get("published_date") ?? "").trim();
+  const abstract = String(form.get("abstract") ?? "").trim();
+  const doiUrl = String(form.get("doi_url") ?? "").trim();
+  const type = String(form.get("type") ?? "").trim();
 
   if (!title || !journal || !publishedDate || !abstract || !type) {
     error = "Semua field wajib diisi (kecuali DOI URL).";

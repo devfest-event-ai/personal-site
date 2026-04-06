@@ -1,6 +1,6 @@
-# CLAUDE.md
+# QWEN.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Qwen Code when working with code in this repository.
 
 ## Commands
 
@@ -23,7 +23,7 @@ Use `bun run check` — not `pnpm` or `npm`. This project uses `bun` as the pack
 
 ## Architecture
 
-This is an **Astro 6** portfolio site for Rachmawati Ari Tauirisia (`porto-ibu`), using:
+This is an **Astro 6** portfolio site for Rachmawati Ari Taurisia (`porto-ibu`), using:
 
 - **Astro** with strict TypeScript — path alias `@/` maps to `src/`
 - **Tailwind CSS v4** via `@tailwindcss/vite` plugin (no `tailwind.config.*` file — config is CSS-native in `src/styles/starwind.css`)
@@ -31,11 +31,13 @@ This is an **Astro 6** portfolio site for Rachmawati Ari Tauirisia (`porto-ibu`)
 - **astro-icon** for Tabler icons (`@tabler/icons`)
 - **astro-seo** for `<SEO>` in `Layout.astro`
 - **Partytown** integration for offloading third-party scripts
+- **Biome v2.4** for formatting and linting
 
 ### Key files
 
 - `src/styles/starwind.css` — global CSS entry point; defines the full design token system (CSS variables for colors, radius, dark mode via `.dark` class)
 - `src/layouts/Layout.astro` — root HTML shell; imports global styles and SEO component
+- `biome.json` — Biome configuration (formatting, linting, import organization)
 - `starwind.config.json` — Starwind component registry config (tracks installed components)
 
 ### Styling conventions
@@ -43,4 +45,5 @@ This is an **Astro 6** portfolio site for Rachmawati Ari Tauirisia (`porto-ibu`)
 Colors use semantic tokens (`bg-background`, `text-foreground`, `border-border`, etc.) defined as CSS variables — avoid raw Tailwind color classes like `bg-neutral-950`. Dark mode is class-based (`.dark`), not media-query-based.
 
 ## Documentation
-all about project documentation is available in this folder 'docs/' 
+
+All about project documentation is available in this folder `docs/`

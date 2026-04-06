@@ -1,12 +1,12 @@
 ---
 export const prerender = false;
 
-import Layout from "@/layouts/Layout.astro";
+import { asc, eq, gt, lt } from "drizzle-orm";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import DetailNavigation from "@/components/DetailNavigation.astro";
 import { db } from "@/db";
 import { speaking } from "@/db/schema";
-import { eq, lt, gt, asc } from "drizzle-orm";
+import Layout from "@/layouts/Layout.astro";
 
 const { slug: paramSlug } = Astro.params;
 
@@ -15,9 +15,10 @@ if (!paramSlug) {
 }
 
 function generateSlug(title: string): string {
-  return title.toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 // Try slug column first, fallback to title-generated slug for old records
@@ -33,7 +34,8 @@ eventRow = slugResult[0] ?? null;
 
 if (!eventRow) {
   const allEvents = await db.select().from(speaking).orderBy(asc(speaking.id));
-  eventRow = allEvents.find((e) => generateSlug(String(e.title)) === paramSlug) ?? null;
+  eventRow =
+    allEvents.find((e) => generateSlug(String(e.title)) === paramSlug) ?? null;
 }
 
 if (!eventRow) {
@@ -58,7 +60,11 @@ try {
 }
 
 const dateObj = new Date(eventDate);
-const fullDate = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
+const fullDate = dateObj.toLocaleDateString("id-ID", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
 
 let prevEvent: { title: string; slug: string } | null = null;
 let nextEvent: { title: string; slug: string } | null = null;
@@ -70,7 +76,7 @@ try {
     .where(lt(speaking.id, eventRow.id))
     .orderBy(asc(speaking.id))
     .limit(1);
-  
+
   if (prevResult.length > 0) {
     const row = prevResult[0];
     prevEvent = {
@@ -87,7 +93,7 @@ try {
     .where(gt(speaking.id, eventRow.id))
     .orderBy(asc(speaking.id))
     .limit(1);
-  
+
   if (nextResult.length > 0) {
     const row = nextResult[0];
     nextEvent = {

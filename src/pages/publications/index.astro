@@ -1,8 +1,8 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import { desc, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { publications } from "@/db/schema";
-import { desc, sql } from "drizzle-orm";
+import Layout from "@/layouts/Layout.astro";
 
 const result = await db
   .select({
@@ -18,23 +18,24 @@ const result = await db
   .orderBy(desc(publications.publishedDate));
 
 function generateSlug(title: string): string {
-  return title.toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 const allPubs = result.map((row) => ({
-  id:             Number(row.id),
-  title:          String(row.title),
-  slug:           generateSlug(String(row.title)),
-  journal:        String(row.journal),
+  id: Number(row.id),
+  title: String(row.title),
+  slug: generateSlug(String(row.title)),
+  journal: String(row.journal),
   published_date: String(row.publishedDate),
-  abstract:       String(row.abstract),
-  doi_url:        row.doiUrl ? String(row.doiUrl) : null,
-  type:           String(row.type),
+  abstract: String(row.abstract),
+  doi_url: row.doiUrl ? String(row.doiUrl) : null,
+  type: String(row.type),
 }));
 
-const journals  = allPubs.filter((p) => p.type === "journal");
+const journals = allPubs.filter((p) => p.type === "journal");
 const citations = allPubs.filter((p) => p.type === "citation");
 ---
 

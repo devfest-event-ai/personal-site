@@ -17,7 +17,8 @@ if (snippet) {
   try {
     const parsed = JSON.parse(snippet);
     formatted = JSON.stringify(parsed, null, 2);
-    isN8nWorkflow = Array.isArray((parsed as { nodes?: unknown[] })?.nodes) &&
+    isN8nWorkflow =
+      Array.isArray((parsed as { nodes?: unknown[] })?.nodes) &&
       ((parsed as { nodes?: unknown[] }).nodes?.length ?? 0) > 0;
   } catch {
     formatted = snippet;

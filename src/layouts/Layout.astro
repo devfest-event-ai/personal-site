@@ -16,21 +16,19 @@ const {
 const personSchema = {
   "@context": "https://schema.org",
   "@type": "Person",
-  "name": "Rachmawati Ari Taurisia",
-  "jobTitle": "AI & Automation Curriculum Architect",
-  "url": "https://racharta.vercel.app",
-  "sameAs": [
-    "https://www.linkedin.com/in/racharta"
-  ],
-  "knowsAbout": [
+  name: "Rachmawati Ari Taurisia",
+  jobTitle: "AI & Automation Curriculum Architect",
+  url: "https://racharta.vercel.app",
+  sameAs: ["https://www.linkedin.com/in/racharta"],
+  knowsAbout: [
     "n8n Workflow Automation",
     "GenAI Productivity",
     "Curriculum Design",
     "AI Agent Development",
     "Gemini API",
-    "Google Workspace Automation"
+    "Google Workspace Automation",
   ],
-  "description": description,
+  description: description,
 };
 ---
 
@@ -105,28 +103,28 @@ const personSchema = {
         </div>
       </div>
     </footer>
+
+    <script>
+      function initScrollAnimations() {
+        const els = document.querySelectorAll<HTMLElement>("[data-animate]");
+        if (!els.length) return;
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0, rootMargin: "0px 0px 200px 0px" }
+        );
+
+        els.forEach((el) => observer.observe(el));
+      }
+
+      document.addEventListener("DOMContentLoaded", initScrollAnimations);
+    </script>
   </body>
-
-  <script>
-    function initScrollAnimations() {
-      const els = document.querySelectorAll<HTMLElement>("[data-animate]");
-      if (!els.length) return;
-
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add("is-visible");
-              observer.unobserve(entry.target);
-            }
-          });
-        },
-        { threshold: 0.1, rootMargin: "0px 0px -48px 0px" }
-      );
-
-      els.forEach((el) => observer.observe(el));
-    }
-
-    document.addEventListener("DOMContentLoaded", initScrollAnimations);
-  </script>
 </html>

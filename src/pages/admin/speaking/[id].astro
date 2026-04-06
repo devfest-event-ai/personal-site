@@ -1,13 +1,16 @@
 ---
-import AdminLayout from "@/layouts/AdminLayout.astro";
+import { eq } from "drizzle-orm";
 import RichEditor from "@/components/RichEditor.astro";
 import { db } from "@/db";
 import { speaking } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import AdminLayout from "@/layouts/AdminLayout.astro";
 import { requireAdminSession, validateId } from "@/lib/admin-auth";
 
 function makeSlug(title: string) {
-  return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 export const prerender = false;
@@ -35,23 +38,39 @@ if (Astro.request.method === "POST") {
     return Astro.redirect("/admin/speaking");
   }
 
-  const title       = String(form.get("title") ?? "").trim();
-  const provider    = String(form.get("provider") ?? "").trim();
-  const event_date  = String(form.get("event_date") ?? "").trim();
-  const role        = String(form.get("role") ?? "").trim();
+  const title = String(form.get("title") ?? "").trim();
+  const provider = String(form.get("provider") ?? "").trim();
+  const event_date = String(form.get("event_date") ?? "").trim();
+  const role = String(form.get("role") ?? "").trim();
   const description = String(form.get("description") ?? "").trim();
-  const link        = String(form.get("link") ?? "").trim();
-  const modules     = String(form.get("modules") ?? "").trim();
+  const link = String(form.get("link") ?? "").trim();
+  const modules = String(form.get("modules") ?? "").trim();
 
   if (!title || !provider || !event_date || !role || !description) {
     error = "Semua field wajib diisi (kecuali link dan modules).";
   } else {
-    await db.update(speaking).set({ title, slug: makeSlug(title), provider, eventDate: event_date, role, description, link: link || null, modules: modules || null }).where(eq(speaking.id, id));
+    await db
+      .update(speaking)
+      .set({
+        title,
+        slug: makeSlug(title),
+        provider,
+        eventDate: event_date,
+        role,
+        description,
+        link: link || null,
+        modules: modules || null,
+      })
+      .where(eq(speaking.id, id));
     return Astro.redirect("/admin/speaking");
   }
 }
 
-const result = await db.select().from(speaking).where(eq(speaking.id, id)).limit(1);
+const result = await db
+  .select()
+  .from(speaking)
+  .where(eq(speaking.id, id))
+  .limit(1);
 if (!result || result.length === 0) return Astro.redirect("/admin/speaking");
 
 const e = result[0];

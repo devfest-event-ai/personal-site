@@ -1,12 +1,12 @@
 ---
 export const prerender = false;
 
-import Layout from "@/layouts/Layout.astro";
+import { asc, desc, eq, gt, lt } from "drizzle-orm";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import DetailNavigation from "@/components/DetailNavigation.astro";
 import { db } from "@/db";
 import { publications } from "@/db/schema";
-import { eq, lt, gt, desc, asc } from "drizzle-orm";
+import Layout from "@/layouts/Layout.astro";
 
 const { slug: paramSlug } = Astro.params;
 
@@ -15,9 +15,10 @@ if (!paramSlug) {
 }
 
 function generateSlug(title: string): string {
-  return title.toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 // Try slug column first, fallback to title-generated slug for old records
@@ -36,7 +37,8 @@ if (!pubRow) {
     .select()
     .from(publications)
     .orderBy(desc(publications.publishedDate));
-  pubRow = allPubs.find((p) => generateSlug(String(p.title)) === paramSlug) ?? null;
+  pubRow =
+    allPubs.find((p) => generateSlug(String(p.title)) === paramSlug) ?? null;
 }
 
 if (!pubRow) {
@@ -53,19 +55,23 @@ const doiUrl = pubRow.doiUrl ? String(pubRow.doiUrl) : null;
 const type = String(pubRow.type);
 
 const dateObj = new Date(publishedDate);
-const fullDate = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "long" });
+const fullDate = dateObj.toLocaleDateString("id-ID", {
+  year: "numeric",
+  month: "long",
+});
 
 const typeLabels: Record<string, string> = {
-  "journal": "Journal Article",
-  "citation": "Expert Citation",
+  journal: "Journal Article",
+  citation: "Expert Citation",
 };
 
 const typeBadgeColors: Record<string, string> = {
-  "journal": "border-primary/30 bg-primary/5 text-primary",
-  "citation": "border-amber-400/40 bg-amber-400/10 text-amber-400",
+  journal: "border-primary/30 bg-primary/5 text-primary",
+  citation: "border-amber-400/40 bg-amber-400/10 text-amber-400",
 };
 
-const badgeClass = typeBadgeColors[type] ?? "border-border/50 bg-muted/60 text-muted-foreground";
+const badgeClass =
+  typeBadgeColors[type] ?? "border-border/50 bg-muted/60 text-muted-foreground";
 const typeLabel = typeLabels[type] ?? type;
 
 // Generate APA-style citation
@@ -78,12 +84,17 @@ let nextPub: { title: string; slug: string } | null = null;
 
 try {
   const prevResult = await db
-    .select({ id: publications.id, title: publications.title, slug: publications.slug, publishedDate: publications.publishedDate })
+    .select({
+      id: publications.id,
+      title: publications.title,
+      slug: publications.slug,
+      publishedDate: publications.publishedDate,
+    })
     .from(publications)
     .where(lt(publications.publishedDate, pubRow.publishedDate))
     .orderBy(desc(publications.publishedDate))
     .limit(1);
-  
+
   if (prevResult.length > 0) {
     const row = prevResult[0];
     prevPub = {
@@ -95,12 +106,17 @@ try {
 
 try {
   const nextResult = await db
-    .select({ id: publications.id, title: publications.title, slug: publications.slug, publishedDate: publications.publishedDate })
+    .select({
+      id: publications.id,
+      title: publications.title,
+      slug: publications.slug,
+      publishedDate: publications.publishedDate,
+    })
     .from(publications)
     .where(gt(publications.publishedDate, pubRow.publishedDate))
     .orderBy(asc(publications.publishedDate))
     .limit(1);
-  
+
   if (nextResult.length > 0) {
     const row = nextResult[0];
     nextPub = {

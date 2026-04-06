@@ -80,9 +80,9 @@ export const GET: APIRoute = async ({ request }) => {
       },
     });
   } catch (err) {
-    return new Response(
-      JSON.stringify(serializeError(err), null, 2),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify(serializeError(err), null, 2), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 };

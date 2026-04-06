@@ -1,9 +1,9 @@
 ---
-import AdminLayout from "@/layouts/AdminLayout.astro";
+import { eq } from "drizzle-orm";
 import RichEditor from "@/components/RichEditor.astro";
 import { db } from "@/db";
 import { projects } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import AdminLayout from "@/layouts/AdminLayout.astro";
 import { requireAdminSession, validateId } from "@/lib/admin-auth";
 
 export const prerender = false;
@@ -32,21 +32,42 @@ if (Astro.request.method === "POST") {
     return Astro.redirect("/admin/projects");
   }
 
-  const title             = String(form.get("title") ?? "").trim();
-  const slug              = String(form.get("slug") ?? "").trim();
-  const description       = String(form.get("description") ?? "").trim();
-  const json_source       = String(form.get("json_source") ?? "").trim();
-  const stackRaw          = String(form.get("stack") ?? "").trim();
-  const stack             = JSON.stringify(stackRaw.split(",").map((s) => s.trim()).filter(Boolean));
-  const screenshot_url    = String(form.get("screenshot_url") ?? "").trim();
+  const title = String(form.get("title") ?? "").trim();
+  const slug = String(form.get("slug") ?? "").trim();
+  const description = String(form.get("description") ?? "").trim();
+  const json_source = String(form.get("json_source") ?? "").trim();
+  const stackRaw = String(form.get("stack") ?? "").trim();
+  const stack = JSON.stringify(
+    stackRaw
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean),
+  );
+  const screenshot_url = String(form.get("screenshot_url") ?? "").trim();
   const blueprint_snippet = String(form.get("blueprint_snippet") ?? "").trim();
 
-  if (!title || !slug || !description || !json_source || !stack || !blueprint_snippet) {
-    error = "Field Title, Slug, Description, JSON Source, Stack, dan Workflow Snippet wajib diisi.";
+  if (
+    !title ||
+    !slug ||
+    !description ||
+    !json_source ||
+    !stack ||
+    !blueprint_snippet
+  ) {
+    error =
+      "Field Title, Slug, Description, JSON Source, Stack, dan Workflow Snippet wajib diisi.";
   } else {
     await db
       .update(projects)
-      .set({ title, slug, description, jsonSource: json_source, stack, screenshotUrl: screenshot_url, blueprintSnippet: blueprint_snippet })
+      .set({
+        title,
+        slug,
+        description,
+        jsonSource: json_source,
+        stack,
+        screenshotUrl: screenshot_url,
+        blueprintSnippet: blueprint_snippet,
+      })
       .where(eq(projects.id, id));
     return Astro.redirect("/admin/projects");
   }
@@ -62,7 +83,11 @@ if (!project || project.length === 0) return Astro.redirect("/admin/projects");
 
 const p = project[0];
 let stackDisplay = "";
-try { stackDisplay = JSON.parse(String(p.stack)).join(", "); } catch { stackDisplay = String(p.stack); }
+try {
+  stackDisplay = JSON.parse(String(p.stack)).join(", ");
+} catch {
+  stackDisplay = String(p.stack);
+}
 
 const existingScreenshot = String(p.screenshotUrl ?? "");
 ---

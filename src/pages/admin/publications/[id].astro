@@ -1,13 +1,16 @@
 ---
-import AdminLayout from "@/layouts/AdminLayout.astro";
+import { eq } from "drizzle-orm";
 import RichEditor from "@/components/RichEditor.astro";
 import { db } from "@/db";
 import { publications } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import AdminLayout from "@/layouts/AdminLayout.astro";
 import { requireAdminSession, validateId } from "@/lib/admin-auth";
 
 function makeSlug(title: string) {
-  return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 export const prerender = false;
@@ -35,23 +38,39 @@ if (Astro.request.method === "POST") {
     return Astro.redirect("/admin/publications");
   }
 
-  const title          = String(form.get("title") ?? "").trim();
-  const journal        = String(form.get("journal") ?? "").trim();
+  const title = String(form.get("title") ?? "").trim();
+  const journal = String(form.get("journal") ?? "").trim();
   const published_date = String(form.get("published_date") ?? "").trim();
-  const abstract       = String(form.get("abstract") ?? "").trim();
-  const doi_url        = String(form.get("doi_url") ?? "").trim();
-  const type           = String(form.get("type") ?? "").trim();
+  const abstract = String(form.get("abstract") ?? "").trim();
+  const doi_url = String(form.get("doi_url") ?? "").trim();
+  const type = String(form.get("type") ?? "").trim();
 
   if (!title || !journal || !published_date || !abstract || !type) {
     error = "Semua field wajib diisi (kecuali DOI URL).";
   } else {
-    await db.update(publications).set({ title, slug: makeSlug(title), journal, publishedDate: published_date, abstract, doiUrl: doi_url || null, type }).where(eq(publications.id, id));
+    await db
+      .update(publications)
+      .set({
+        title,
+        slug: makeSlug(title),
+        journal,
+        publishedDate: published_date,
+        abstract,
+        doiUrl: doi_url || null,
+        type,
+      })
+      .where(eq(publications.id, id));
     return Astro.redirect("/admin/publications");
   }
 }
 
-const result = await db.select().from(publications).where(eq(publications.id, id)).limit(1);
-if (!result || result.length === 0) return Astro.redirect("/admin/publications");
+const result = await db
+  .select()
+  .from(publications)
+  .where(eq(publications.id, id))
+  .limit(1);
+if (!result || result.length === 0)
+  return Astro.redirect("/admin/publications");
 
 const p = result[0];
 ---

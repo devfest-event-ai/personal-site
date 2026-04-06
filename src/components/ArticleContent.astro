@@ -15,15 +15,15 @@ try {
 
 function renderTiptapHtml(json: any): string {
   if (!json || !json.content) return "";
-  
+
   return json.content.map((node: any) => renderNode(node)).join("");
 }
 
 function renderNode(node: any): string {
   const { type, attrs, content, marks, text } = node;
-  
+
   let html = "";
-  
+
   // Apply marks first
   let innerText = text || "";
   if (marks && marks.length > 0) {
@@ -31,52 +31,72 @@ function renderNode(node: any): string {
       innerText = applyMark(mark, innerText);
     }
   }
-  
+
   switch (type) {
     case "paragraph":
-      html = content ? `<p class="mb-4 leading-relaxed text-foreground">${content.map(renderNode).join("")}</p>` : "<p class=\"mb-4 leading-relaxed text-foreground\"><br></p>";
+      html = content
+        ? `<p class="mb-4 leading-relaxed text-foreground">${content.map(renderNode).join("")}</p>`
+        : '<p class="mb-4 leading-relaxed text-foreground"><br></p>';
       break;
-    case "heading":
+    case "heading": {
       const level = attrs?.level || 2;
       const headingClasses = {
         2: "text-2xl font-bold tracking-tight text-foreground mt-8 mb-4",
         3: "text-xl font-bold tracking-tight text-foreground mt-6 mb-3",
         4: "text-lg font-semibold text-foreground mt-4 mb-2",
       };
-      const cls = headingClasses[level as keyof typeof headingClasses] || headingClasses[2];
-      html = content ? `<h${level} class="${cls}">${content.map(renderNode).join("")}</h${level}>` : "";
+      const cls =
+        headingClasses[level as keyof typeof headingClasses] ||
+        headingClasses[2];
+      html = content
+        ? `<h${level} class="${cls}">${content.map(renderNode).join("")}</h${level}>`
+        : "";
       break;
+    }
     case "text":
       html = innerText;
       break;
     case "bulletList":
-      html = content ? `<ul class="my-4 ml-6 list-disc space-y-2 text-foreground">${content.map(renderNode).join("")}</ul>` : "";
+      html = content
+        ? `<ul class="my-4 ml-6 list-disc space-y-2 text-foreground">${content.map(renderNode).join("")}</ul>`
+        : "";
       break;
     case "orderedList":
-      html = content ? `<ol class="my-4 ml-6 list-decimal space-y-2 text-foreground">${content.map(renderNode).join("")}</ol>` : "";
+      html = content
+        ? `<ol class="my-4 ml-6 list-decimal space-y-2 text-foreground">${content.map(renderNode).join("")}</ol>`
+        : "";
       break;
     case "listItem":
-      html = content ? `<li class="leading-relaxed">${content.map(renderNode).join("")}</li>` : "";
+      html = content
+        ? `<li class="leading-relaxed">${content.map(renderNode).join("")}</li>`
+        : "";
       break;
     case "blockquote":
-      html = content ? `<blockquote class="my-6 border-l-4 border-primary/30 pl-4 italic text-muted-foreground">${content.map(renderNode).join("")}</blockquote>` : "";
+      html = content
+        ? `<blockquote class="my-6 border-l-4 border-primary/30 pl-4 italic text-muted-foreground">${content.map(renderNode).join("")}</blockquote>`
+        : "";
       break;
-    case "codeBlock":
-      const codeContent = content?.find((c: any) => c.type === "text")?.text || "";
+    case "codeBlock": {
+      const codeContent =
+        content?.find((c: any) => c.type === "text")?.text || "";
       const language = attrs?.language || "";
       html = `<pre class="my-6 overflow-x-auto rounded-lg border border-border/40 bg-muted/40 p-4"><code class="text-xs leading-relaxed text-foreground">${escapeHtml(codeContent)}</code></pre>`;
       break;
+    }
     case "hardBreak":
       html = "<br>";
       break;
     case "horizontalRule":
       html = '<hr class="my-8 border-border/40">';
       break;
-    case "image":
+    case "image": {
       const src = attrs?.src || "";
       const alt = attrs?.alt || "";
-      html = src ? `<img src="${src}" alt="${alt}" class="my-6 w-full rounded-lg">` : "";
+      html = src
+        ? `<img src="${src}" alt="${alt}" class="my-6 w-full rounded-lg">`
+        : "";
       break;
+    }
     case "link":
       // Links are handled as marks
       break;
@@ -85,7 +105,7 @@ function renderNode(node: any): string {
         html = content.map(renderNode).join("");
       }
   }
-  
+
   return html;
 }
 
@@ -99,10 +119,13 @@ function applyMark(mark: any, text: string): string {
       return `<code class="rounded bg-muted px-1.5 py-0.5 text-xs font-mono text-primary">${text}</code>`;
     case "strike":
       return `<s>${text}</s>`;
-    case "link":
+    case "link": {
       const href = mark.attrs?.href || "#";
-      const target = href.startsWith("http") ? ' target="_blank" rel="noopener noreferrer"' : "";
+      const target = href.startsWith("http")
+        ? ' target="_blank" rel="noopener noreferrer"'
+        : "";
       return `<a href="${href}" class="text-primary underline underline-offset-4 hover:text-primary/80"${target}>${text}</a>`;
+    }
     default:
       return text;
   }
@@ -110,11 +133,11 @@ function applyMark(mark: any, text: string): string {
 
 function escapeHtml(text: string): string {
   const map: Record<string, string> = {
-    '&': '&',
-    '<': '<',
-    '>': '>',
+    "&": "&",
+    "<": "<",
+    ">": ">",
     '"': '"',
-    "'": '&#039;',
+    "'": "&#039;",
   };
   return text.replace(/[&<>"']/g, (m) => map[m]);
 }

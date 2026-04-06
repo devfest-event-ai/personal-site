@@ -3,7 +3,9 @@ import { createSign } from "crypto";
 import { requireAdminSession } from "@/lib/admin-auth";
 
 function createJWT(email: string, privateKey: string): string {
-  const header = Buffer.from(JSON.stringify({ alg: "RS256", typ: "JWT" })).toString("base64url");
+  const header = Buffer.from(
+    JSON.stringify({ alg: "RS256", typ: "JWT" }),
+  ).toString("base64url");
   const now = Math.floor(Date.now() / 1000);
   const claim = Buffer.from(
     JSON.stringify({
@@ -12,7 +14,7 @@ function createJWT(email: string, privateKey: string): string {
       aud: "https://oauth2.googleapis.com/token",
       exp: now + 3600,
       iat: now,
-    })
+    }),
   ).toString("base64url");
 
   const signer = createSign("RSA-SHA256");
@@ -21,7 +23,10 @@ function createJWT(email: string, privateKey: string): string {
   return `${header}.${claim}.${sig}`;
 }
 
-async function getAccessToken(email: string, privateKey: string): Promise<string> {
+async function getAccessToken(
+  email: string,
+  privateKey: string,
+): Promise<string> {
   const jwt = createJWT(email, privateKey);
   const res = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
@@ -58,7 +63,7 @@ export const POST: APIRoute = async ({ request }) => {
         error:
           "Google Drive not configured. Set GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY.",
       }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }
 
@@ -75,10 +80,13 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   if (!file.type.startsWith("image/")) {
-    return new Response(JSON.stringify({ error: "Only image files are allowed" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: "Only image files are allowed" }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 
   let accessToken: string;
@@ -92,7 +100,10 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  const metadata: Record<string, unknown> = { name: file.name, mimeType: file.type };
+  const metadata: Record<string, unknown> = {
+    name: file.name,
+    mimeType: file.type,
+  };
   if (folderId) metadata.parents = [folderId];
 
   const boundary = `porto_${Date.now()}`;
@@ -118,15 +129,18 @@ export const POST: APIRoute = async ({ request }) => {
         "Content-Type": `multipart/related; boundary=${boundary}`,
       },
       body,
-    }
+    },
   );
 
   if (!uploadRes.ok) {
     const errText = await uploadRes.text();
-    return new Response(JSON.stringify({ error: "Upload failed", detail: errText }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: "Upload failed", detail: errText }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 
   const { id: fileId } = (await uploadRes.json()) as { id: string };
@@ -140,14 +154,14 @@ export const POST: APIRoute = async ({ request }) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ role: "reader", type: "anyone" }),
-    }
+    },
   );
 
   if (!permRes.ok) {
     const errText = await permRes.text();
     return new Response(
       JSON.stringify({ error: "Failed to make file public", detail: errText }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }
 

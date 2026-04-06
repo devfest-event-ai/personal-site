@@ -25,8 +25,10 @@ try {
   stackTags = [project.stack];
 }
 
-const staggerDelay = 100 + index * 150;
-const hasScreenshot = Boolean(project.screenshot_url?.trim() && project.screenshot_url !== "null");
+const staggerDelay = index * 80;
+const hasScreenshot = Boolean(
+  project.screenshot_url?.trim() && project.screenshot_url !== "null",
+);
 ---
 
 <article

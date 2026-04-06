@@ -1,8 +1,8 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import { asc } from "drizzle-orm";
 import { db } from "@/db";
 import { speaking } from "@/db/schema";
-import { asc } from "drizzle-orm";
+import Layout from "@/layouts/Layout.astro";
 
 const result = await db
   .select({
@@ -19,41 +19,50 @@ const result = await db
   .orderBy(asc(speaking.id));
 
 function generateSlug(title: string): string {
-  return title.toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 const events = result.map((row) => ({
-  id:          Number(row.id),
-  title:       String(row.title),
-  slug:        generateSlug(String(row.title)),
-  provider:    String(row.provider),
-  event_date:  String(row.eventDate),
-  role:        String(row.role),
+  id: Number(row.id),
+  title: String(row.title),
+  slug: generateSlug(String(row.title)),
+  provider: String(row.provider),
+  event_date: String(row.eventDate),
+  role: String(row.role),
   description: String(row.description),
-  link:        String(row.link),
-  modules:     (() => {
-    try { return JSON.parse(String(row.modules)) as { title: string; desc: string }[]; }
-    catch { return []; }
+  link: String(row.link),
+  modules: (() => {
+    try {
+      return JSON.parse(String(row.modules)) as {
+        title: string;
+        desc: string;
+      }[];
+    } catch {
+      return [];
+    }
   })(),
 }));
 
-const courseSchema = events[0] ? {
-  "@context": "https://schema.org",
-  "@type": "Course",
-  "name": events[0].title,
-  "description": events[0].description,
-  "provider": {
-    "@type": "Organization",
-    "name": events[0].provider,
-  },
-  "instructor": {
-    "@type": "Person",
-    "name": "Rachmawati Ari Taurisia",
-  },
-  "url": events[0].link,
-} : null;
+const courseSchema = events[0]
+  ? {
+      "@context": "https://schema.org",
+      "@type": "Course",
+      name: events[0].title,
+      description: events[0].description,
+      provider: {
+        "@type": "Organization",
+        name: events[0].provider,
+      },
+      instructor: {
+        "@type": "Person",
+        name: "Rachmawati Ari Taurisia",
+      },
+      url: events[0].link,
+    }
+  : null;
 ---
 
 <Layout

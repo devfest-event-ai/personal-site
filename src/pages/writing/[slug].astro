@@ -1,13 +1,13 @@
 ---
 export const prerender = false;
 
-import Layout from "@/layouts/Layout.astro";
+import { desc, eq, gt, lt } from "drizzle-orm";
+import ArticleContent from "@/components/ArticleContent.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import DetailNavigation from "@/components/DetailNavigation.astro";
-import ArticleContent from "@/components/ArticleContent.astro";
 import { db } from "@/db";
 import { writing } from "@/db/schema";
-import { desc, eq, lt, gt } from "drizzle-orm";
+import Layout from "@/layouts/Layout.astro";
 
 const { slug: paramSlug } = Astro.params;
 
@@ -16,9 +16,10 @@ if (!paramSlug) {
 }
 
 function generateSlug(title: string): string {
-  return title.toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 // Try to query by slug first using Drizzle
@@ -38,11 +39,12 @@ try {
     .select()
     .from(writing)
     .orderBy(desc(writing.publishedDate));
-  
-  articleRow = allArticles.find((a) => {
-    const titleSlug = generateSlug(String(a.title));
-    return titleSlug === paramSlug;
-  }) || null;
+
+  articleRow =
+    allArticles.find((a) => {
+      const titleSlug = generateSlug(String(a.title));
+      return titleSlug === paramSlug;
+    }) || null;
 }
 
 if (!articleRow) {
@@ -51,16 +53,22 @@ if (!articleRow) {
 
 const articleId = Number(articleRow.id);
 const title = String(articleRow.title);
-const articleSlug = articleRow.slug ? String(articleRow.slug) : generateSlug(title);
+const articleSlug = articleRow.slug
+  ? String(articleRow.slug)
+  : generateSlug(title);
 const category = String(articleRow.category);
 const description = String(articleRow.description);
 const url = String(articleRow.url);
 const publishedDate = String(articleRow.publishedDate);
 const content = articleRow.content ? String(articleRow.content) : null;
 const coverImage = articleRow.coverImage ? String(articleRow.coverImage) : null;
-const readingTime = articleRow.readingTime ? Number(articleRow.readingTime) : null;
+const readingTime = articleRow.readingTime
+  ? Number(articleRow.readingTime)
+  : null;
 const tagsStr = articleRow.tags ? String(articleRow.tags) : null;
-const isExternal = articleRow.isExternal ? Number(articleRow.isExternal) === 1 : false;
+const isExternal = articleRow.isExternal
+  ? Number(articleRow.isExternal) === 1
+  : false;
 
 let tags: string[] = [];
 if (tagsStr) {
@@ -72,15 +80,21 @@ if (tagsStr) {
 }
 
 const dateObj = new Date(publishedDate);
-const fullDate = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
+const fullDate = dateObj.toLocaleDateString("id-ID", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
 
 const categoryColors: Record<string, string> = {
-  "Strategy":           "border-blue-400/40 bg-blue-400/10 text-blue-400",
+  Strategy: "border-blue-400/40 bg-blue-400/10 text-blue-400",
   "Technical Tutorial": "border-violet-400/40 bg-violet-400/10 text-violet-400",
-  "Analysis":           "border-amber-400/40 bg-amber-400/10 text-amber-400",
+  Analysis: "border-amber-400/40 bg-amber-400/10 text-amber-400",
 };
 
-const badgeClass = categoryColors[category] ?? "border-border/50 bg-muted/60 text-muted-foreground";
+const badgeClass =
+  categoryColors[category] ??
+  "border-border/50 bg-muted/60 text-muted-foreground";
 
 // Get prev/next articles - efficient query using Drizzle
 let prevArticle: { title: string; slug: string } | null = null;
@@ -88,12 +102,17 @@ let nextArticle: { title: string; slug: string } | null = null;
 
 try {
   const prevResult = await db
-    .select({ id: writing.id, title: writing.title, slug: writing.slug, publishedDate: writing.publishedDate })
+    .select({
+      id: writing.id,
+      title: writing.title,
+      slug: writing.slug,
+      publishedDate: writing.publishedDate,
+    })
     .from(writing)
     .where(lt(writing.publishedDate, articleRow.publishedDate))
     .orderBy(desc(writing.publishedDate))
     .limit(1);
-  
+
   if (prevResult.length > 0) {
     const row = prevResult[0];
     prevArticle = {
@@ -105,12 +124,17 @@ try {
 
 try {
   const nextResult = await db
-    .select({ id: writing.id, title: writing.title, slug: writing.slug, publishedDate: writing.publishedDate })
+    .select({
+      id: writing.id,
+      title: writing.title,
+      slug: writing.slug,
+      publishedDate: writing.publishedDate,
+    })
     .from(writing)
     .where(gt(writing.publishedDate, articleRow.publishedDate))
     .orderBy(writing.publishedDate)
     .limit(1);
-  
+
   if (nextResult.length > 0) {
     const row = nextResult[0];
     nextArticle = {

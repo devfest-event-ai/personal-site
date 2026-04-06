@@ -1,5 +1,5 @@
-import { auth } from "@/lib/auth.js";
 import type { APIContext } from "astro";
+import { auth } from "@/lib/auth.js";
 
 /**
  * Check if the current request has a valid admin session.
@@ -21,7 +21,9 @@ export async function requireAdminSession(headers: Headers) {
  * Validate that an ID is a valid number string.
  * Returns the ID as a number, or null if invalid.
  */
-export function validateId(id: string | FormDataEntryValue | null): number | null {
+export function validateId(
+  id: string | FormDataEntryValue | null,
+): number | null {
   if (!id) return null;
   const num = Number(id);
   if (isNaN(num) || num <= 0) return null;

@@ -1,9 +1,9 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import { asc } from "drizzle-orm";
 import ProjectCard from "@/components/ProjectCard.astro";
 import { db } from "@/db";
 import { projects as projectsTable } from "@/db/schema";
-import { asc } from "drizzle-orm";
+import Layout from "@/layouts/Layout.astro";
 
 const result = await db
   .select()
@@ -11,13 +11,13 @@ const result = await db
   .orderBy(asc(projectsTable.id));
 
 const projects = result.map((row) => ({
-  id:                Number(row.id),
-  title:             String(row.title),
-  slug:              String(row.slug),
-  description:       String(row.description),
-  json_source:       String(row.jsonSource),
-  stack:             String(row.stack),
-  screenshot_url:    String(row.screenshotUrl),
+  id: Number(row.id),
+  title: String(row.title),
+  slug: String(row.slug),
+  description: String(row.description),
+  json_source: String(row.jsonSource),
+  stack: String(row.stack),
+  screenshot_url: String(row.screenshotUrl),
   blueprint_snippet: String(row.blueprintSnippet),
 }));
 ---

@@ -1,13 +1,13 @@
 ---
 export const prerender = false;
 
-import Layout from "@/layouts/Layout.astro";
+import { asc, eq } from "drizzle-orm";
+import BlueprintViewer from "@/components/BlueprintViewer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import DetailNavigation from "@/components/DetailNavigation.astro";
-import BlueprintViewer from "@/components/BlueprintViewer.astro";
 import { db } from "@/db";
 import { projects } from "@/db/schema";
-import { eq, asc } from "drizzle-orm";
+import Layout from "@/layouts/Layout.astro";
 
 const { slug } = Astro.params;
 
@@ -40,7 +40,9 @@ try {
   stackTags = [stack];
 }
 
-const hasScreenshot = Boolean(screenshotUrl?.trim() && screenshotUrl !== "null");
+const hasScreenshot = Boolean(
+  screenshotUrl?.trim() && screenshotUrl !== "null",
+);
 
 // Get prev/next projects
 const allProjects = await db
@@ -55,7 +57,10 @@ const projectsList = allProjects.map((row) => ({
 
 const currentIndex = projectsList.findIndex((p) => p.slug === slug);
 const prevProject = currentIndex > 0 ? projectsList[currentIndex - 1] : null;
-const nextProject = currentIndex < projectsList.length - 1 ? projectsList[currentIndex + 1] : null;
+const nextProject =
+  currentIndex < projectsList.length - 1
+    ? projectsList[currentIndex + 1]
+    : null;
 
 const seo = {
   title: `${title} — Rachmawati Ari Taurisia`,

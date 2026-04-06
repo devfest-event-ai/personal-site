@@ -1,12 +1,15 @@
 ---
-import AdminLayout from "@/layouts/AdminLayout.astro";
 import RichEditor from "@/components/RichEditor.astro";
 import { db } from "@/db";
 import { speaking } from "@/db/schema";
+import AdminLayout from "@/layouts/AdminLayout.astro";
 import { requireAdminSession } from "@/lib/admin-auth";
 
 function makeSlug(title: string) {
-  return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 export const prerender = false;
@@ -21,13 +24,13 @@ let error = "";
 
 if (Astro.request.method === "POST") {
   const form = await Astro.request.formData();
-  const title       = String(form.get("title") ?? "").trim();
-  const provider    = String(form.get("provider") ?? "").trim();
-  const eventDate   = String(form.get("event_date") ?? "").trim();
-  const role        = String(form.get("role") ?? "").trim();
+  const title = String(form.get("title") ?? "").trim();
+  const provider = String(form.get("provider") ?? "").trim();
+  const eventDate = String(form.get("event_date") ?? "").trim();
+  const role = String(form.get("role") ?? "").trim();
   const description = String(form.get("description") ?? "").trim();
-  const link        = String(form.get("link") ?? "").trim();
-  const modules     = String(form.get("modules") ?? "").trim();
+  const link = String(form.get("link") ?? "").trim();
+  const modules = String(form.get("modules") ?? "").trim();
 
   if (!title || !provider || !eventDate || !role || !description) {
     error = "Semua field wajib diisi (kecuali link dan modules).";

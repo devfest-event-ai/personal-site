@@ -1,20 +1,20 @@
-import { useCallback, useState } from "react";
 import {
-  ReactFlow,
-  Background,
-  Controls,
-  MiniMap,
   addEdge,
-  useNodesState,
-  useEdgesState,
-  type Node,
-  type Edge,
-  type Connection,
-  type NodeProps,
-  Handle,
-  Position,
+  Background,
   BackgroundVariant,
+  type Connection,
+  Controls,
+  type Edge,
+  Handle,
+  MiniMap,
+  type Node,
+  type NodeProps,
+  Position,
+  ReactFlow,
+  useEdgesState,
+  useNodesState,
 } from "@xyflow/react";
+import { useCallback, useState } from "react";
 import "@xyflow/react/dist/style.css";
 
 // ── Color map for n8n node types ──────────────────────────────────────────────
@@ -22,16 +22,60 @@ function getNodeColor(type: string | undefined): string {
   if (!type) return "#64748b";
   const t = type.toLowerCase();
   if (t.includes("stickynote")) return "#f5e642";
-  if (t.includes("trigger") || t.includes("webhook") || t.includes("schedule") || t.includes("cron")) return "#10b981";
-  if (t.includes("gmail") || t.includes("email") || t.includes("smtp") || t.includes("outlook") || t.includes("imap")) return "#ea4335";
+  if (
+    t.includes("trigger") ||
+    t.includes("webhook") ||
+    t.includes("schedule") ||
+    t.includes("cron")
+  )
+    return "#10b981";
+  if (
+    t.includes("gmail") ||
+    t.includes("email") ||
+    t.includes("smtp") ||
+    t.includes("outlook") ||
+    t.includes("imap")
+  )
+    return "#ea4335";
   if (t.includes("googlesheet") || t.includes("spreadsheet")) return "#34a853";
   if (t.includes("googledrive") || t.includes("google-drive")) return "#4285f4";
   if (t.includes("http") || t.includes("request")) return "#3b82f6";
-  if (t.includes("if") || t.includes("switch") || t.includes("condition") || t.includes("merge")) return "#f59e0b";
-  if (t.includes("function") || t.includes("code") || t.includes("javascript") || t.includes("python")) return "#8b5cf6";
-  if (t.includes("telegram") || t.includes("slack") || t.includes("discord") || t.includes("whatsapp")) return "#06b6d4";
-  if (t.includes("openai") || t.includes("gemini") || t.includes("anthropic") || t.includes("llm") || t.includes("langchain")) return "#7c3aed";
-  if (t.includes("postgres") || t.includes("mysql") || t.includes("mongo") || t.includes("redis")) return "#0ea5e9";
+  if (
+    t.includes("if") ||
+    t.includes("switch") ||
+    t.includes("condition") ||
+    t.includes("merge")
+  )
+    return "#f59e0b";
+  if (
+    t.includes("function") ||
+    t.includes("code") ||
+    t.includes("javascript") ||
+    t.includes("python")
+  )
+    return "#8b5cf6";
+  if (
+    t.includes("telegram") ||
+    t.includes("slack") ||
+    t.includes("discord") ||
+    t.includes("whatsapp")
+  )
+    return "#06b6d4";
+  if (
+    t.includes("openai") ||
+    t.includes("gemini") ||
+    t.includes("anthropic") ||
+    t.includes("llm") ||
+    t.includes("langchain")
+  )
+    return "#7c3aed";
+  if (
+    t.includes("postgres") ||
+    t.includes("mysql") ||
+    t.includes("mongo") ||
+    t.includes("redis")
+  )
+    return "#0ea5e9";
   if (t.includes("set") || t.includes("noop")) return "#64748b";
   return "#ff6d5a";
 }
@@ -130,11 +174,21 @@ function N8nNodeComponent({ data }: NodeProps) {
         display: "flex",
         alignItems: "center",
         padding: "0 12px",
-        boxShadow: "0 2px 8px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.15)",
+        boxShadow:
+          "0 2px 8px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.15)",
         cursor: "pointer",
       }}
     >
-      <Handle type="target" position={Position.Left} style={{ background: "rgba(255,255,255,0.5)", border: "none", width: 8, height: 8 }} />
+      <Handle
+        type="target"
+        position={Position.Left}
+        style={{
+          background: "rgba(255,255,255,0.5)",
+          border: "none",
+          width: 8,
+          height: 8,
+        }}
+      />
       <span
         style={{
           color: "#fff",
@@ -148,7 +202,16 @@ function N8nNodeComponent({ data }: NodeProps) {
       >
         {d.label}
       </span>
-      <Handle type="source" position={Position.Right} style={{ background: "rgba(255,255,255,0.5)", border: "none", width: 8, height: 8 }} />
+      <Handle
+        type="source"
+        position={Position.Right}
+        style={{
+          background: "rgba(255,255,255,0.5)",
+          border: "none",
+          width: 8,
+          height: 8,
+        }}
+      />
     </div>
   );
 }
@@ -213,19 +276,38 @@ function DetailPanel({ node, onClose }: DetailPanelProps) {
         color: "#e2e8f0",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 10,
+        }}
+      >
         <span style={{ fontWeight: 700, fontSize: 13 }}>{d.label}</span>
         <button
           onClick={onClose}
-          style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: 16, lineHeight: 1, padding: 2 }}
+          style={{
+            background: "none",
+            border: "none",
+            color: "#94a3b8",
+            cursor: "pointer",
+            fontSize: 16,
+            lineHeight: 1,
+            padding: 2,
+          }}
         >
           ✕
         </button>
       </div>
-      <div style={{ marginBottom: 6, color: "#94a3b8", fontSize: 11 }}>{d.nodeType}</div>
+      <div style={{ marginBottom: 6, color: "#94a3b8", fontSize: 11 }}>
+        {d.nodeType}
+      </div>
       {d.parameters && Object.keys(d.parameters).length > 0 && (
         <>
-          <div style={{ fontWeight: 600, marginBottom: 4, color: "#94a3b8" }}>Parameters</div>
+          <div style={{ fontWeight: 600, marginBottom: 4, color: "#94a3b8" }}>
+            Parameters
+          </div>
           <pre
             style={{
               background: "rgba(0,0,0,0.3)",
@@ -254,7 +336,8 @@ interface WorkflowViewerProps {
 }
 
 export default function WorkflowViewer({ snippet }: WorkflowViewerProps) {
-  const { nodes: initialNodes, edges: initialEdges } = parseN8nWorkflow(snippet);
+  const { nodes: initialNodes, edges: initialEdges } =
+    parseN8nWorkflow(snippet);
 
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -262,7 +345,7 @@ export default function WorkflowViewer({ snippet }: WorkflowViewerProps) {
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
+    [setEdges],
   );
 
   const onNodeDoubleClick = useCallback((_: React.MouseEvent, node: Node) => {
@@ -294,10 +377,23 @@ export default function WorkflowViewer({ snippet }: WorkflowViewerProps) {
         proOptions={{ hideAttribution: true }}
         style={{ background: "#0f172a" }}
       >
-        <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="rgba(255,255,255,0.06)" />
-        <Controls style={{ background: "#1e293b", border: "1px solid rgba(255,255,255,0.1)" }} />
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={20}
+          size={1}
+          color="rgba(255,255,255,0.06)"
+        />
+        <Controls
+          style={{
+            background: "#1e293b",
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
+        />
         <MiniMap
-          style={{ background: "#1e293b", border: "1px solid rgba(255,255,255,0.1)" }}
+          style={{
+            background: "#1e293b",
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
           nodeColor={(n) => {
             const d = n.data as N8nNodeData;
             return d?.color ?? "#64748b";
