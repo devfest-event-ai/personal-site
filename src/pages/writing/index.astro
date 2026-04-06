@@ -1,8 +1,13 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { writing } from "@/db/schema";
+import { desc } from "drizzle-orm";
 
-const result = await turso.execute("SELECT * FROM writing ORDER BY published_date DESC");
+const result = await db
+  .select()
+  .from(writing)
+  .orderBy(desc(writing.publishedDate));
 
 function generateSlug(title: string): string {
   return title.toLowerCase()
@@ -10,15 +15,15 @@ function generateSlug(title: string): string {
     .replace(/^-|-$/g, '');
 }
 
-const articles = result.rows.map((row) => ({
+const articles = result.map((row) => ({
   id:             Number(row.id),
   title:          String(row.title),
   slug:           row.slug ? String(row.slug) : generateSlug(String(row.title)),
   category:       String(row.category),
   description:    String(row.description),
   url:            String(row.url),
-  published_date: String(row.published_date),
-  is_external:    row.is_external ? Number(row.is_external) === 1 : false,
+  published_date: String(row.publishedDate),
+  is_external:    row.isExternal ? Number(row.isExternal) === 1 : false,
 }));
 
 const categoryColors: Record<string, string> = {

@@ -4,7 +4,9 @@ export const prerender = false;
 import Layout from "@/layouts/Layout.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import DetailNavigation from "@/components/DetailNavigation.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { speaking } from "@/db/schema";
+import { eq, lt, gt, asc } from "drizzle-orm";
 
 const { slug: paramSlug } = Astro.params;
 
@@ -18,22 +20,26 @@ function generateSlug(title: string): string {
     .replace(/^-|-$/g, '');
 }
 
-// Try to find by slug first, fallback to title-based matching
-let eventRow: any = null;
+// Try to query by slug first using Drizzle
+let eventRow: typeof speaking.$inferSelect | null = null;
 try {
-  const result = await turso.execute({
-    sql: "SELECT * FROM speaking WHERE slug = ?",
-    args: [paramSlug],
-  });
-  if (result.rows.length > 0) {
-    eventRow = result.rows[0];
+  const result = await db
+    .select()
+    .from(speaking)
+    .where(eq(speaking.slug, paramSlug))
+    .limit(1);
+  if (result.length > 0) {
+    eventRow = result[0];
   }
 } catch {
-  // If slug column doesn't exist, try matching by title
-  const allResult = await turso.execute("SELECT * FROM speaking");
-  eventRow = allResult.rows.find((row) => {
-    const rowSlug = row.slug ? String(row.slug) : generateSlug(String(row.title));
-    return rowSlug === paramSlug;
+  const allEvents = await db
+    .select()
+    .from(speaking)
+    .orderBy(asc(speaking.id));
+  
+  eventRow = allEvents.find((e) => {
+    const titleSlug = generateSlug(String(e.title));
+    return titleSlug === paramSlug;
   }) || null;
 }
 
@@ -45,7 +51,7 @@ const eventId = Number(eventRow.id);
 const title = String(eventRow.title);
 const eventSlug = eventRow.slug ? String(eventRow.slug) : generateSlug(title);
 const provider = String(eventRow.provider);
-const eventDate = String(eventRow.event_date);
+const eventDate = String(eventRow.eventDate);
 const role = String(eventRow.role);
 const description = String(eventRow.description);
 const link = String(eventRow.link);
@@ -61,17 +67,42 @@ try {
 const dateObj = new Date(eventDate);
 const fullDate = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
 
-// Get prev/next events
-const allEvents = await turso.execute("SELECT id, title, slug FROM speaking ORDER BY id ASC");
-const eventsList = allEvents.rows.map((row) => ({
-  id: Number(row.id),
-  title: String(row.title),
-  slug: row.slug ? String(row.slug) : generateSlug(String(row.title)),
-}));
+let prevEvent: { title: string; slug: string } | null = null;
+let nextEvent: { title: string; slug: string } | null = null;
 
-const currentIndex = eventsList.findIndex((e) => e.slug === eventSlug);
-const prevEvent = currentIndex > 0 ? eventsList[currentIndex - 1] : null;
-const nextEvent = currentIndex < eventsList.length - 1 ? eventsList[currentIndex + 1] : null;
+try {
+  const prevResult = await db
+    .select({ id: speaking.id, title: speaking.title, slug: speaking.slug })
+    .from(speaking)
+    .where(lt(speaking.id, eventRow.id))
+    .orderBy(asc(speaking.id))
+    .limit(1);
+  
+  if (prevResult.length > 0) {
+    const row = prevResult[0];
+    prevEvent = {
+      title: String(row.title),
+      slug: row.slug ? String(row.slug) : generateSlug(String(row.title)),
+    };
+  }
+} catch {}
+
+try {
+  const nextResult = await db
+    .select({ id: speaking.id, title: speaking.title, slug: speaking.slug })
+    .from(speaking)
+    .where(gt(speaking.id, eventRow.id))
+    .orderBy(asc(speaking.id))
+    .limit(1);
+  
+  if (nextResult.length > 0) {
+    const row = nextResult[0];
+    nextEvent = {
+      title: String(row.title),
+      slug: row.slug ? String(row.slug) : generateSlug(String(row.title)),
+    };
+  }
+} catch {}
 
 const seo = {
   title: `${title} — Rachmawati Ari Taurisia`,

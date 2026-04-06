@@ -3,39 +3,41 @@ import Layout from "@/layouts/Layout.astro";
 import Hero from "@/components/Hero.astro";
 import LogoStrip from "@/components/LogoStrip.astro";
 import ProjectCard from "@/components/ProjectCard.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { projects, writing, speaking } from "@/db/schema";
+import { asc, desc } from "drizzle-orm";
 
 const [projectsResult, writingResult, speakingResult] = await Promise.all([
-  turso.execute("SELECT * FROM projects ORDER BY id ASC"),
-  turso.execute("SELECT * FROM writing ORDER BY published_date DESC LIMIT 3"),
-  turso.execute("SELECT * FROM speaking ORDER BY id ASC LIMIT 1"),
+  db.select().from(projects).orderBy(asc(projects.id)),
+  db.select().from(writing).orderBy(desc(writing.publishedDate)).limit(3),
+  db.select().from(speaking).orderBy(asc(speaking.id)).limit(1),
 ]);
 
-const projects = projectsResult.rows.map((row) => ({
+const projects = projectsResult.map((row) => ({
   id:                Number(row.id),
   title:             String(row.title),
   slug:              String(row.slug),
   description:       String(row.description),
-  json_source:       String(row.json_source),
+  json_source:       String(row.jsonSource),
   stack:             String(row.stack),
-  screenshot_url:    String(row.screenshot_url),
-  blueprint_snippet: String(row.blueprint_snippet),
+  screenshot_url:    String(row.screenshotUrl),
+  blueprint_snippet: String(row.blueprintSnippet),
 }));
 
-const articles = writingResult.rows.map((row) => ({
+const articles = writingResult.map((row) => ({
   id:             Number(row.id),
   title:          String(row.title),
   category:       String(row.category),
   description:    String(row.description),
   url:            String(row.url),
-  published_date: String(row.published_date),
+  published_date: String(row.publishedDate),
 }));
 
-const speakingEvents = speakingResult.rows.map((row) => ({
+const speakingEvents = speakingResult.map((row) => ({
   id:          Number(row.id),
   title:       String(row.title),
   provider:    String(row.provider),
-  event_date:  String(row.event_date),
+  event_date:  String(row.eventDate),
   role:        String(row.role),
   description: String(row.description),
   link:        String(row.link),

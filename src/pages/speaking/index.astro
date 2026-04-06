@@ -1,8 +1,22 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { speaking } from "@/db/schema";
+import { asc } from "drizzle-orm";
 
-const result = await turso.execute("SELECT * FROM speaking ORDER BY id ASC");
+const result = await db
+  .select({
+    id: speaking.id,
+    title: speaking.title,
+    provider: speaking.provider,
+    eventDate: speaking.eventDate,
+    role: speaking.role,
+    description: speaking.description,
+    link: speaking.link,
+    modules: speaking.modules,
+  })
+  .from(speaking)
+  .orderBy(asc(speaking.id));
 
 function generateSlug(title: string): string {
   return title.toLowerCase()
@@ -10,12 +24,12 @@ function generateSlug(title: string): string {
     .replace(/^-|-$/g, '');
 }
 
-const events = result.rows.map((row) => ({
+const events = result.map((row) => ({
   id:          Number(row.id),
   title:       String(row.title),
-  slug:        row.slug ? String(row.slug) : generateSlug(String(row.title)),
+  slug:        generateSlug(String(row.title)),
   provider:    String(row.provider),
-  event_date:  String(row.event_date),
+  event_date:  String(row.eventDate),
   role:        String(row.role),
   description: String(row.description),
   link:        String(row.link),

@@ -5,7 +5,9 @@ import Layout from "@/layouts/Layout.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import DetailNavigation from "@/components/DetailNavigation.astro";
 import ArticleContent from "@/components/ArticleContent.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { writing } from "@/db/schema";
+import { desc, eq, lt, gt } from "drizzle-orm";
 
 const { slug: paramSlug } = Astro.params;
 
@@ -13,21 +15,33 @@ if (!paramSlug) {
   return Astro.redirect("/404");
 }
 
-let articleRow: any = null;
+function generateSlug(title: string): string {
+  return title.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+// Try to query by slug first using Drizzle
+let articleRow: typeof writing.$inferSelect | null = null;
 try {
-  const result = await turso.execute({
-    sql: "SELECT * FROM writing WHERE slug = ?",
-    args: [paramSlug],
-  });
-  if (result.rows.length > 0) {
-    articleRow = result.rows[0];
+  const result = await db
+    .select()
+    .from(writing)
+    .where(eq(writing.slug, paramSlug))
+    .limit(1);
+  if (result.length > 0) {
+    articleRow = result[0];
   }
 } catch {
-  // If slug column doesn't exist, try matching by title
-  const allResult = await turso.execute("SELECT * FROM writing");
-  articleRow = allResult.rows.find((row) => {
-    const rowSlug = row.slug ? String(row.slug) : String(row.title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    return rowSlug === paramSlug;
+  // If slug column doesn't exist or query fails, fallback to fetching all and matching by title slug
+  const allArticles = await db
+    .select()
+    .from(writing)
+    .orderBy(desc(writing.publishedDate));
+  
+  articleRow = allArticles.find((a) => {
+    const titleSlug = generateSlug(String(a.title));
+    return titleSlug === paramSlug;
   }) || null;
 }
 
@@ -37,16 +51,16 @@ if (!articleRow) {
 
 const articleId = Number(articleRow.id);
 const title = String(articleRow.title);
-const articleSlug = articleRow.slug ? String(articleRow.slug) : title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const articleSlug = articleRow.slug ? String(articleRow.slug) : generateSlug(title);
 const category = String(articleRow.category);
 const description = String(articleRow.description);
 const url = String(articleRow.url);
-const publishedDate = String(articleRow.published_date);
+const publishedDate = String(articleRow.publishedDate);
 const content = articleRow.content ? String(articleRow.content) : null;
-const coverImage = articleRow.cover_image ? String(articleRow.cover_image) : null;
-const readingTime = articleRow.reading_time ? Number(articleRow.reading_time) : null;
+const coverImage = articleRow.coverImage ? String(articleRow.coverImage) : null;
+const readingTime = articleRow.readingTime ? Number(articleRow.readingTime) : null;
 const tagsStr = articleRow.tags ? String(articleRow.tags) : null;
-const isExternal = articleRow.is_external ? Number(articleRow.is_external) === 1 : false;
+const isExternal = articleRow.isExternal ? Number(articleRow.isExternal) === 1 : false;
 
 let tags: string[] = [];
 if (tagsStr) {
@@ -68,17 +82,43 @@ const categoryColors: Record<string, string> = {
 
 const badgeClass = categoryColors[category] ?? "border-border/50 bg-muted/60 text-muted-foreground";
 
-// Get prev/next articles
-const allArticles = await turso.execute("SELECT id, title, slug FROM writing ORDER BY published_date DESC");
-const articlesList = allArticles.rows.map((row) => ({
-  id: Number(row.id),
-  title: String(row.title),
-  slug: row.slug ? String(row.slug) : String(row.title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
-}));
+// Get prev/next articles - efficient query using Drizzle
+let prevArticle: { title: string; slug: string } | null = null;
+let nextArticle: { title: string; slug: string } | null = null;
 
-const currentIndex = articlesList.findIndex((a) => a.slug === articleSlug);
-const prevArticle = currentIndex > 0 ? articlesList[currentIndex - 1] : null;
-const nextArticle = currentIndex < articlesList.length - 1 ? articlesList[currentIndex + 1] : null;
+try {
+  const prevResult = await db
+    .select({ id: writing.id, title: writing.title, slug: writing.slug, publishedDate: writing.publishedDate })
+    .from(writing)
+    .where(lt(writing.publishedDate, articleRow.publishedDate))
+    .orderBy(desc(writing.publishedDate))
+    .limit(1);
+  
+  if (prevResult.length > 0) {
+    const row = prevResult[0];
+    prevArticle = {
+      title: String(row.title),
+      slug: row.slug ? String(row.slug) : generateSlug(String(row.title)),
+    };
+  }
+} catch {}
+
+try {
+  const nextResult = await db
+    .select({ id: writing.id, title: writing.title, slug: writing.slug, publishedDate: writing.publishedDate })
+    .from(writing)
+    .where(gt(writing.publishedDate, articleRow.publishedDate))
+    .orderBy(writing.publishedDate)
+    .limit(1);
+  
+  if (nextResult.length > 0) {
+    const row = nextResult[0];
+    nextArticle = {
+      title: String(row.title),
+      slug: row.slug ? String(row.slug) : generateSlug(String(row.title)),
+    };
+  }
+} catch {}
 
 const seo = {
   title: `${title} — Rachmawati Ari Taurisia`,
@@ -158,7 +198,6 @@ const seo = {
     <!-- Article Content -->
     <section class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
       {isExternal ? (
-        <!-- External article - show description + CTA -->
         <div
           data-animate
           class="rounded-2xl border border-border/50 bg-card p-8 shadow-sm"
@@ -179,10 +218,8 @@ const seo = {
           </a>
         </div>
       ) : content ? (
-        <!-- Internal article - render full content -->
         <ArticleContent content={content} />
       ) : (
-        <!-- Fallback - show description -->
         <div
           data-animate
           class="rounded-2xl border border-border/50 bg-card p-8 shadow-sm"

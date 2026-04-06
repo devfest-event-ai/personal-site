@@ -4,7 +4,9 @@ export const prerender = false;
 import Layout from "@/layouts/Layout.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import DetailNavigation from "@/components/DetailNavigation.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { publications } from "@/db/schema";
+import { asc } from "drizzle-orm";
 
 const { slug: paramSlug } = Astro.params;
 
@@ -18,24 +20,23 @@ function generateSlug(title: string): string {
     .replace(/^-|-$/g, '');
 }
 
-// Try to find by slug first, fallback to title-based matching
-let pubRow: any = null;
-try {
-  const result = await turso.execute({
-    sql: "SELECT * FROM publications WHERE slug = ?",
-    args: [paramSlug],
-  });
-  if (result.rows.length > 0) {
-    pubRow = result.rows[0];
-  }
-} catch {
-  // If slug column doesn't exist, try matching by title
-  const allResult = await turso.execute("SELECT * FROM publications");
-  pubRow = allResult.rows.find((row) => {
-    const rowSlug = row.slug ? String(row.slug) : generateSlug(String(row.title));
-    return rowSlug === paramSlug;
-  }) || null;
-}
+// Fetch all publications and find matching slug
+const allResult = await db
+  .select({
+    id: publications.id,
+    title: publications.title,
+    journal: publications.journal,
+    publishedDate: publications.publishedDate,
+    abstract: publications.abstract,
+    doiUrl: publications.doiUrl,
+    type: publications.type,
+  })
+  .from(publications)
+  .orderBy(asc(publications.id));
+const pubRow = allResult.find((row) => {
+  const rowSlug = generateSlug(String(row.title));
+  return rowSlug === paramSlug;
+});
 
 if (!pubRow) {
   return Astro.redirect("/404");
@@ -45,9 +46,9 @@ const pubId = Number(pubRow.id);
 const title = String(pubRow.title);
 const pubSlug = pubRow.slug ? String(pubRow.slug) : generateSlug(title);
 const journal = String(pubRow.journal);
-const publishedDate = String(pubRow.published_date);
+const publishedDate = String(pubRow.publishedDate);
 const abstract = String(pubRow.abstract);
-const doiUrl = pubRow.doi_url ? String(pubRow.doi_url) : null;
+const doiUrl = pubRow.doiUrl ? String(pubRow.doiUrl) : null;
 const type = String(pubRow.type);
 
 const dateObj = new Date(publishedDate);
@@ -71,11 +72,10 @@ const authorName = "Taurisia, R. A.";
 const citation = `${authorName} (${dateObj.getFullYear()}). ${title}. ${journal}.`;
 
 // Get prev/next publications
-const allPubs = await turso.execute("SELECT id, title, slug FROM publications ORDER BY published_date DESC");
-const pubsList = allPubs.rows.map((row) => ({
+const pubsList = allResult.map((row) => ({
   id: Number(row.id),
   title: String(row.title),
-  slug: row.slug ? String(row.slug) : generateSlug(String(row.title)),
+  slug: generateSlug(String(row.title)),
 }));
 
 const currentIndex = pubsList.findIndex((p) => p.slug === pubSlug);
@@ -238,7 +238,6 @@ const seo = {
 </Layout>
 
 <script>
-  // Copy citation to clipboard
   document.getElementById("copy-citation-btn")?.addEventListener("click", async () => {
     const citationText = document.getElementById("citation-text")?.textContent;
     if (!citationText) return;

@@ -1,8 +1,21 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { publications } from "@/db/schema";
+import { desc, sql } from "drizzle-orm";
 
-const result = await turso.execute("SELECT * FROM publications ORDER BY published_date DESC");
+const result = await db
+  .select({
+    id: publications.id,
+    title: publications.title,
+    journal: publications.journal,
+    publishedDate: publications.publishedDate,
+    abstract: publications.abstract,
+    doiUrl: publications.doiUrl,
+    type: publications.type,
+  })
+  .from(publications)
+  .orderBy(desc(publications.publishedDate));
 
 function generateSlug(title: string): string {
   return title.toLowerCase()
@@ -10,14 +23,14 @@ function generateSlug(title: string): string {
     .replace(/^-|-$/g, '');
 }
 
-const allPubs = result.rows.map((row) => ({
+const allPubs = result.map((row) => ({
   id:             Number(row.id),
   title:          String(row.title),
-  slug:           row.slug ? String(row.slug) : generateSlug(String(row.title)),
+  slug:           generateSlug(String(row.title)),
   journal:        String(row.journal),
-  published_date: String(row.published_date),
+  published_date: String(row.publishedDate),
   abstract:       String(row.abstract),
-  doi_url:        row.doi_url ? String(row.doi_url) : null,
+  doi_url:        row.doiUrl ? String(row.doiUrl) : null,
   type:           String(row.type),
 }));
 

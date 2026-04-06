@@ -5,7 +5,9 @@ import Layout from "@/layouts/Layout.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import DetailNavigation from "@/components/DetailNavigation.astro";
 import BlueprintViewer from "@/components/BlueprintViewer.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { projects } from "@/db/schema";
+import { eq, asc } from "drizzle-orm";
 
 const { slug } = Astro.params;
 
@@ -13,21 +15,22 @@ if (!slug) {
   return Astro.redirect("/404");
 }
 
-const result = await turso.execute({
-  sql: "SELECT * FROM projects WHERE slug = ?",
-  args: [slug],
-});
+const result = await db
+  .select()
+  .from(projects)
+  .where(eq(projects.slug, slug))
+  .limit(1);
 
-if (result.rows.length === 0) {
+if (result.length === 0) {
   return Astro.redirect("/404");
 }
 
-const project = result.rows[0];
+const project = result[0];
 const projectId = Number(project.id);
 const title = String(project.title);
 const description = String(project.description);
-const screenshotUrl = String(project.screenshot_url);
-const blueprintSnippet = String(project.blueprint_snippet);
+const screenshotUrl = String(project.screenshotUrl);
+const blueprintSnippet = String(project.blueprintSnippet);
 const stack = String(project.stack);
 
 let stackTags: string[] = [];
@@ -40,8 +43,11 @@ try {
 const hasScreenshot = Boolean(screenshotUrl?.trim() && screenshotUrl !== "null");
 
 // Get prev/next projects
-const allProjects = await turso.execute("SELECT id, title, slug FROM projects ORDER BY id ASC");
-const projectsList = allProjects.rows.map((row) => ({
+const allProjects = await db
+  .select({ id: projects.id, title: projects.title, slug: projects.slug })
+  .from(projects)
+  .orderBy(asc(projects.id));
+const projectsList = allProjects.map((row) => ({
   id: Number(row.id),
   title: String(row.title),
   slug: String(row.slug),
