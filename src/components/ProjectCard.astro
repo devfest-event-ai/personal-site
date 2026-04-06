@@ -6,7 +6,7 @@ interface Project {
   title: string;
   slug: string;
   description: string;
-  stack: string;          // JSON array string: '["n8n","Gmail API"]'
+  stack: string;
   screenshot_url: string;
   blueprint_snippet: string;
 }
@@ -35,7 +35,7 @@ const hasScreenshot = Boolean(project.screenshot_url?.trim() && project.screensh
   class="group flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/5"
 >
   <!-- Screenshot / Skeleton / Placeholder -->
-  <div class="relative aspect-[16/9] overflow-hidden bg-muted">
+  <a href={`/projects/${project.slug}`} class="relative block aspect-[16/9] overflow-hidden bg-muted">
 
     {hasScreenshot ? (
       <>
@@ -77,14 +77,14 @@ const hasScreenshot = Boolean(project.screenshot_url?.trim() && project.screensh
       </div>
     )}
 
-  </div>
+  </a>
 
   <!-- Content -->
   <div class="flex flex-1 flex-col gap-4 p-6">
-    <!-- Title -->
-    <h3 class="text-xl font-bold tracking-tight text-foreground">
+    <!-- Title (clickable) -->
+    <a href={`/projects/${project.slug}`} class="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
       {project.title}
-    </h3>
+    </a>
 
     <!-- Description -->
     <p class="flex-1 text-sm leading-relaxed text-muted-foreground">
@@ -100,7 +100,7 @@ const hasScreenshot = Boolean(project.screenshot_url?.trim() && project.screensh
       ))}
     </div>
 
-    <!-- Blueprint viewer toggle -->
-    <BlueprintViewer snippet={project.blueprint_snippet} projectId={project.slug} />
+    <!-- Blueprint viewer link (goes to detail page) -->
+    <BlueprintViewer projectSlug={project.slug} />
   </div>
 </article>

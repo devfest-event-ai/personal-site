@@ -1,56 +1,76 @@
 ---
 interface Props {
-  snippet: string;
-  projectId: string;
+  snippet?: string;
+  projectId?: string;
+  projectSlug?: string;
+  showInline?: boolean;
 }
 
-const { snippet, projectId } = Astro.props;
+const { snippet, projectId, projectSlug, showInline = false } = Astro.props;
 
-let formatted = snippet;
-try {
-  formatted = JSON.stringify(JSON.parse(snippet), null, 2);
-} catch {
-  // use raw string if not valid JSON
+let formatted = "";
+if (snippet) {
+  try {
+    formatted = JSON.stringify(JSON.parse(snippet), null, 2);
+  } catch {
+    formatted = snippet;
+  }
 }
 
-const viewerId = `blueprint-${projectId}`;
-const btnId    = `btn-${projectId}`;
+const viewerId = projectId ? `blueprint-${projectId}` : `blueprint-${projectSlug}`;
+const btnId = projectId ? `btn-${projectId}` : `btn-${projectSlug}`;
 ---
 
-<div>
-  <button
-    id={btnId}
-    data-viewer={viewerId}
-    aria-expanded="false"
+{showInline && snippet ? (
+  <div>
+    <button
+      id={btnId}
+      data-viewer={viewerId}
+      aria-expanded="false"
+      class="inline-flex items-center gap-1.5 rounded-md border border-border/60 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+        <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+      </svg>
+      <span>View Blueprint</span>
+      <svg id={`chevron-${projectId || projectSlug}`} xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 transition-transform duration-200">
+        <path d="m6 9 6 6 6-6"/>
+      </svg>
+    </button>
+
+    <div
+      id={viewerId}
+      class="hidden mt-3 overflow-hidden rounded-lg border border-border/40 bg-muted/40"
+    >
+      <div class="flex items-center justify-between border-b border-border/40 px-4 py-2">
+        <span class="text-xs font-semibold text-muted-foreground tracking-wide uppercase">Structural Blueprint</span>
+        <span class="text-xs text-muted-foreground/60">Sanitized — no credentials</span>
+      </div>
+      <pre class="overflow-x-auto p-4 text-xs leading-relaxed text-foreground/80"><code>{formatted}</code></pre>
+    </div>
+  </div>
+) : projectSlug ? (
+  <a
+    href={`/projects/${projectSlug}`}
     class="inline-flex items-center gap-1.5 rounded-md border border-border/60 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
   >
     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
       <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
     </svg>
     <span>View Blueprint</span>
-    <svg id={`chevron-${projectId}`} xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 transition-transform duration-200">
-      <path d="m6 9 6 6 6-6"/>
+    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+      <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
     </svg>
-  </button>
-
-  <div
-    id={viewerId}
-    class="hidden mt-3 overflow-hidden rounded-lg border border-border/40 bg-muted/40"
-  >
-    <div class="flex items-center justify-between border-b border-border/40 px-4 py-2">
-      <span class="text-xs font-semibold text-muted-foreground tracking-wide uppercase">Structural Blueprint</span>
-      <span class="text-xs text-muted-foreground/60">Sanitized — no credentials</span>
-    </div>
-    <pre class="overflow-x-auto p-4 text-xs leading-relaxed text-foreground/80"><code>{formatted}</code></pre>
-  </div>
-</div>
+  </a>
+) : null}
 
 <script>
   document.querySelectorAll<HTMLButtonElement>("[data-viewer]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const viewerId = btn.dataset.viewer!;
       const viewer   = document.getElementById(viewerId);
-      const chevron  = document.getElementById(`chevron-${viewerId.replace("blueprint-", "")}`);
+      const chevronId = viewerId.replace("blueprint-", "");
+      const chevron  = document.getElementById(`chevron-${chevronId}`);
       if (!viewer) return;
 
       const isOpen = !viewer.classList.contains("hidden");
