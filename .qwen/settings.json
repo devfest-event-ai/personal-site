@@ -3,7 +3,8 @@
     "allow": [
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(pnpm run *)"
+      "Bash(pnpm run *)",
+      "WebSearch"
     ]
   },
   "$version": 3
