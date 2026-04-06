@@ -21,7 +21,9 @@ const viewerId = projectId ? `blueprint-${projectId}` : `blueprint-${projectSlug
 const btnId = projectId ? `btn-${projectId}` : `btn-${projectSlug}`;
 ---
 
-{showInline && snippet ? (
+{!showInline && snippet && !projectSlug ? (
+  <pre class="overflow-x-auto text-xs leading-relaxed text-foreground/80"><code>{formatted}</code></pre>
+) : showInline && snippet ? (
   <div>
     <button
       id={btnId}

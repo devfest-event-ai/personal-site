@@ -20,27 +20,20 @@ function generateSlug(title: string): string {
     .replace(/^-|-$/g, '');
 }
 
-// Try to query by slug first using Drizzle
+// Try slug column first, fallback to title-generated slug for old records
 let eventRow: typeof speaking.$inferSelect | null = null;
-try {
-  const result = await db
-    .select()
-    .from(speaking)
-    .where(eq(speaking.slug, paramSlug))
-    .limit(1);
-  if (result.length > 0) {
-    eventRow = result[0];
-  }
-} catch {
-  const allEvents = await db
-    .select()
-    .from(speaking)
-    .orderBy(asc(speaking.id));
-  
-  eventRow = allEvents.find((e) => {
-    const titleSlug = generateSlug(String(e.title));
-    return titleSlug === paramSlug;
-  }) || null;
+
+const slugResult = await db
+  .select()
+  .from(speaking)
+  .where(eq(speaking.slug, paramSlug))
+  .limit(1);
+
+eventRow = slugResult[0] ?? null;
+
+if (!eventRow) {
+  const allEvents = await db.select().from(speaking).orderBy(asc(speaking.id));
+  eventRow = allEvents.find((e) => generateSlug(String(e.title)) === paramSlug) ?? null;
 }
 
 if (!eventRow) {
@@ -159,9 +152,7 @@ const seo = {
         data-animate
         class="rounded-2xl border border-border/50 bg-card p-6 shadow-sm sm:p-8"
       >
-        <p class="text-base leading-relaxed text-muted-foreground">
-          {description}
-        </p>
+        <div class="text-base leading-relaxed text-muted-foreground prose prose-sm max-w-none" set:html={description} />
       </div>
     </section>
 

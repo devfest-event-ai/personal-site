@@ -10,6 +10,10 @@ interface Props {
 
 const { title } = Astro.props;
 
+const pathname = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === "/admin" ? pathname === "/admin" : pathname === href || pathname.startsWith(href + "/");
+
 const session = await auth.api
   .getSession({ headers: Astro.request.headers })
   .catch(() => null);
@@ -33,12 +37,25 @@ const userName = session?.user?.name ?? session?.user?.email ?? "Admin";
         <span class="text-sm font-semibold text-foreground">Admin Panel</span>
       </div>
       <nav class="flex-1 px-3 py-4 flex flex-col gap-1 text-sm">
-        <a href="/admin" class="px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">Dashboard</a>
-        <a href="/admin/projects" class="px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">Projects</a>
-        <a href="/admin/writing" class="px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">Writing</a>
-        <a href="/admin/publications" class="px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">Publications</a>
-        <a href="/admin/speaking" class="px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">Speaking</a>
-        <a href="/admin/contacts" class="px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">Contacts</a>
+        {[
+          { href: "/admin", label: "Dashboard" },
+          { href: "/admin/projects", label: "Projects" },
+          { href: "/admin/writing", label: "Writing" },
+          { href: "/admin/publications", label: "Publications" },
+          { href: "/admin/speaking", label: "Speaking" },
+          { href: "/admin/contacts", label: "Contacts" },
+        ].map(({ href, label }) => (
+          <a
+            href={href}
+            class={`px-3 py-2 rounded-md transition-colors ${
+              isActive(href)
+                ? "bg-accent text-accent-foreground font-medium"
+                : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+            }`}
+          >
+            {label}
+          </a>
+        ))}
       </nav>
     </aside>
 

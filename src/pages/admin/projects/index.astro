@@ -54,27 +54,58 @@ const allProjects = await db
         </tr>
       </thead>
       <tbody>
-        {allProjects.map((p) => (
+        {allProjects.map((p) => {
+          let stackTags: string[] = [];
+          try { stackTags = JSON.parse(String(p.stack)); } catch { stackTags = [String(p.stack)]; }
+          return (
           <tr class="border-b border-border last:border-0 hover:bg-accent/40 transition-colors">
-            <td class="px-4 py-3 text-muted-foreground">{p.id}</td>
+            <td class="px-4 py-3 text-muted-foreground text-xs">{p.id}</td>
             <td class="px-4 py-3 font-medium">
               <a href={`/projects/${p.slug}`} class="text-foreground underline-offset-2 hover:underline hover:text-primary transition-colors" target="_blank">
                 {p.title}
               </a>
             </td>
-            <td class="px-4 py-3 text-muted-foreground">{p.stack}</td>
-            <td class="px-4 py-3 text-muted-foreground truncate max-w-48">{p.screenshotUrl}</td>
-            <td class="px-4 py-3 flex items-center gap-2">
-              <a href={`/admin/projects/${p.id}`} class="text-foreground underline-offset-2 hover:underline">Edit</a>
-              <a href={`/projects/${p.slug}`} class="text-primary underline-offset-2 hover:underline" target="_blank">View</a>
-              <form method="POST">
-                <input type="hidden" name="id" value={p.id} />
-                <button type="submit" class="text-destructive hover:underline underline-offset-2"
-                  onclick="return confirm('Delete this project?')">Delete</button>
-              </form>
+            <td class="px-4 py-3">
+              <div class="flex flex-wrap gap-1">
+                {stackTags.map((tag) => (
+                  <span class="inline-flex items-center rounded border border-border/60 bg-muted/60 px-1.5 py-0.5 text-xs text-muted-foreground">{tag}</span>
+                ))}
+              </div>
+            </td>
+            <td class="px-4 py-3 text-muted-foreground text-xs truncate max-w-36">{p.screenshotUrl}</td>
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-1.5">
+                <a
+                  href={`/admin/projects/${p.id}`}
+                  class="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium hover:bg-accent transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                  Edit
+                </a>
+                <a
+                  href={`/projects/${p.slug}`}
+                  target="_blank"
+                  class="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium hover:bg-accent transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                  View
+                </a>
+                <form method="POST">
+                  <input type="hidden" name="id" value={p.id} />
+                  <button
+                    type="submit"
+                    onclick="return confirm('Delete this project?')"
+                    class="inline-flex items-center gap-1 rounded-md border border-destructive/40 bg-destructive/5 px-2.5 py-1 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                    Delete
+                  </button>
+                </form>
+              </div>
             </td>
           </tr>
-        ))}
+          );
+        })}
         {allProjects.length === 0 && (
           <tr>
             <td colspan="5" class="px-4 py-8 text-center text-muted-foreground">No projects yet.</td>

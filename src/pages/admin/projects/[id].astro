@@ -1,5 +1,6 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
+import RichEditor from "@/components/RichEditor.astro";
 import { db } from "@/db";
 import { projects } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -35,7 +36,8 @@ if (Astro.request.method === "POST") {
   const slug             = String(form.get("slug") ?? "").trim();
   const description      = String(form.get("description") ?? "").trim();
   const json_source      = String(form.get("json_source") ?? "").trim();
-  const stack            = String(form.get("stack") ?? "").trim();
+  const stackRaw         = String(form.get("stack") ?? "").trim();
+  const stack            = JSON.stringify(stackRaw.split(",").map((s) => s.trim()).filter(Boolean));
   const screenshot_url   = String(form.get("screenshot_url") ?? "").trim();
   const blueprint_snippet = String(form.get("blueprint_snippet") ?? "").trim();
 
@@ -59,6 +61,8 @@ const project = await db
 if (!project || project.length === 0) return Astro.redirect("/admin/projects");
 
 const p = project[0];
+let stackDisplay = "";
+try { stackDisplay = JSON.parse(String(p.stack)).join(", "); } catch { stackDisplay = String(p.stack); }
 ---
 
 <AdminLayout title="Edit Project">
@@ -81,25 +85,23 @@ const p = project[0];
         <span class="font-medium">Slug</span>
         <input name="slug" type="text" required value={String(p.slug)} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
       </label>
-      <label class="flex flex-col gap-1.5 text-sm">
-        <span class="font-medium">Description</span>
-        <textarea name="description" required rows="3" class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30 resize-y">{String(p.description)}</textarea>
-      </label>
+      <RichEditor name="description" label="Description" required id="description" value={String(p.description)} rows={4} />
       <label class="flex flex-col gap-1.5 text-sm">
         <span class="font-medium">JSON Source URL</span>
-        <input name="json_source" type="text" required value={String(p.json_source)} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+        <input name="json_source" type="text" required value={String(p.jsonSource)} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
       </label>
       <label class="flex flex-col gap-1.5 text-sm">
         <span class="font-medium">Stack</span>
-        <input name="stack" type="text" required value={String(p.stack)} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+        <input name="stack" type="text" required value={stackDisplay} placeholder="n8n, Gemini Vision, Gmail API" class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+        <span class="text-xs text-muted-foreground">Pisahkan dengan koma, contoh: n8n, Gemini Vision, Gmail API</span>
       </label>
       <label class="flex flex-col gap-1.5 text-sm">
         <span class="font-medium">Screenshot URL</span>
-        <input name="screenshot_url" type="text" required value={String(p.screenshot_url)} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+        <input name="screenshot_url" type="text" required value={String(p.screenshotUrl)} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
       </label>
       <label class="flex flex-col gap-1.5 text-sm">
         <span class="font-medium">Blueprint Snippet</span>
-        <textarea name="blueprint_snippet" required rows="4" class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30 resize-y font-mono text-xs">{String(p.blueprint_snippet)}</textarea>
+        <textarea name="blueprint_snippet" required rows="4" class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30 resize-y font-mono text-xs">{String(p.blueprintSnippet)}</textarea>
       </label>
       <div class="flex gap-3 pt-2">
         <button type="submit" class="px-5 py-2 bg-foreground text-background text-sm rounded-md hover:opacity-90 transition-opacity">Save</button>
@@ -108,10 +110,19 @@ const p = project[0];
     </form>
 
     <!-- Delete -->
-    <form method="POST" class="mt-4">
-      <input type="hidden" name="_action" value="delete" />
-      <button type="submit" class="text-sm text-destructive hover:underline underline-offset-2"
-        onclick="return confirm('Delete this project?')">Delete project</button>
-    </form>
+    <div class="mt-6 pt-6 border-t border-border">
+      <p class="text-sm text-muted-foreground mb-3">Danger zone</p>
+      <form method="POST">
+        <input type="hidden" name="_action" value="delete" />
+        <button
+          type="submit"
+          onclick="return confirm('Delete this project? This cannot be undone.')"
+          class="inline-flex items-center gap-2 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Delete project
+        </button>
+      </form>
+    </div>
   </div>
 </AdminLayout>

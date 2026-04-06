@@ -20,28 +20,23 @@ function generateSlug(title: string): string {
     .replace(/^-|-$/g, '');
 }
 
-// Try to query by slug first using Drizzle
+// Try slug column first, fallback to title-generated slug for old records
 let pubRow: typeof publications.$inferSelect | null = null;
-try {
-  const result = await db
-    .select()
-    .from(publications)
-    .where(eq(publications.slug, paramSlug))
-    .limit(1);
-  if (result.length > 0) {
-    pubRow = result[0];
-  }
-} catch {
-  // If slug column doesn't exist or query fails, fallback to fetching all and matching by title slug
+
+const slugResult = await db
+  .select()
+  .from(publications)
+  .where(eq(publications.slug, paramSlug))
+  .limit(1);
+
+pubRow = slugResult[0] ?? null;
+
+if (!pubRow) {
   const allPubs = await db
     .select()
     .from(publications)
     .orderBy(desc(publications.publishedDate));
-  
-  pubRow = allPubs.find((p) => {
-    const titleSlug = generateSlug(String(p.title));
-    return titleSlug === paramSlug;
-  }) || null;
+  pubRow = allPubs.find((p) => generateSlug(String(p.title)) === paramSlug) ?? null;
 }
 
 if (!pubRow) {
@@ -170,9 +165,7 @@ const seo = {
         class="rounded-2xl border border-border/50 bg-card p-6 shadow-sm sm:p-8"
       >
         <h2 class="mb-4 text-lg font-semibold text-foreground">Abstract</h2>
-        <p class="text-sm leading-relaxed text-muted-foreground">
-          {abstract}
-        </p>
+        <div class="text-sm leading-relaxed text-muted-foreground prose prose-sm max-w-none" set:html={abstract} />
       </div>
     </section>
 

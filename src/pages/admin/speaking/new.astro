@@ -1,8 +1,13 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
+import RichEditor from "@/components/RichEditor.astro";
 import { db } from "@/db";
 import { speaking } from "@/db/schema";
 import { requireAdminSession } from "@/lib/admin-auth";
+
+function makeSlug(title: string) {
+  return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
 
 export const prerender = false;
 
@@ -29,6 +34,7 @@ if (Astro.request.method === "POST") {
   } else {
     await db.insert(speaking).values({
       title,
+      slug: makeSlug(title),
       provider,
       eventDate,
       role,
@@ -69,10 +75,7 @@ if (Astro.request.method === "POST") {
         <span class="font-medium">Event Date</span>
         <input name="event_date" type="date" required class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
       </label>
-      <label class="flex flex-col gap-1.5 text-sm">
-        <span class="font-medium">Description</span>
-        <textarea name="description" required rows="3" class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30 resize-y"></textarea>
-      </label>
+      <RichEditor name="description" label="Description" required id="description" rows={4} />
       <label class="flex flex-col gap-1.5 text-sm">
         <span class="font-medium">Link <span class="text-muted-foreground font-normal">(opsional)</span></span>
         <input name="link" type="url" class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />

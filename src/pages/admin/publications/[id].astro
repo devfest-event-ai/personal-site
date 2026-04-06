@@ -1,9 +1,14 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
+import RichEditor from "@/components/RichEditor.astro";
 import { db } from "@/db";
 import { publications } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { requireAdminSession, validateId } from "@/lib/admin-auth";
+
+function makeSlug(title: string) {
+  return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
 
 export const prerender = false;
 
@@ -40,7 +45,7 @@ if (Astro.request.method === "POST") {
   if (!title || !journal || !published_date || !abstract || !type) {
     error = "Semua field wajib diisi (kecuali DOI URL).";
   } else {
-    await db.update(publications).set({ title, journal, publishedDate: published_date, abstract, doiUrl: doi_url || null, type }).where(eq(publications.id, id));
+    await db.update(publications).set({ title, slug: makeSlug(title), journal, publishedDate: published_date, abstract, doiUrl: doi_url || null, type }).where(eq(publications.id, id));
     return Astro.redirect("/admin/publications");
   }
 }
@@ -80,15 +85,12 @@ const p = result[0];
       </label>
       <label class="flex flex-col gap-1.5 text-sm">
         <span class="font-medium">Published Date</span>
-        <input name="published_date" type="date" required value={String(p.published_date)} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+        <input name="published_date" type="date" required value={String(p.publishedDate)} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
       </label>
-      <label class="flex flex-col gap-1.5 text-sm">
-        <span class="font-medium">Abstract</span>
-        <textarea name="abstract" required rows="4" class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30 resize-y">{String(p.abstract)}</textarea>
-      </label>
+      <RichEditor name="abstract" label="Abstract" required id="abstract" value={String(p.abstract)} rows={5} />
       <label class="flex flex-col gap-1.5 text-sm">
         <span class="font-medium">DOI URL <span class="text-muted-foreground font-normal">(opsional)</span></span>
-        <input name="doi_url" type="url" value={p.doi_url ? String(p.doi_url) : ""} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+        <input name="doi_url" type="url" value={p.doiUrl ? String(p.doiUrl) : ""} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
       </label>
       <div class="flex gap-3 pt-2">
         <button type="submit" class="px-5 py-2 bg-foreground text-background text-sm rounded-md hover:opacity-90 transition-opacity">Save</button>
