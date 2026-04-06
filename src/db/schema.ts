@@ -16,15 +16,22 @@ export const projects = sqliteTable("projects", {
 export const writing = sqliteTable("writing", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
+  slug: text("slug").unique(),
   category: text("category").notNull(),
   description: text("description").notNull(),
   url: text("url").notNull(),
   publishedDate: text("published_date").notNull(),
+  content: text("content"),
+  coverImage: text("cover_image"),
+  readingTime: integer("reading_time"),
+  tags: text("tags"),
+  isExternal: integer("is_external").default(0),
 });
 
 export const publications = sqliteTable("publications", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
+  slug: text("slug").unique(),
   journal: text("journal").notNull(),
   publishedDate: text("published_date").notNull(),
   abstract: text("abstract").notNull(),
@@ -35,6 +42,7 @@ export const publications = sqliteTable("publications", {
 export const speaking = sqliteTable("speaking", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
+  slug: text("slug").unique(),
   provider: text("provider").notNull(),
   eventDate: text("event_date").notNull(),
   role: text("role").notNull(),
