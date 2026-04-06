@@ -26,8 +26,8 @@ if (Astro.request.method === "POST") {
   const screenshot_url    = String(form.get("screenshot_url") ?? "").trim();
   const blueprint_snippet = String(form.get("blueprint_snippet") ?? "").trim();
 
-  if (!title || !slug || !description || !json_source || !stack || !screenshot_url || !blueprint_snippet) {
-    error = "Semua field wajib diisi.";
+  if (!title || !slug || !description || !json_source || !stack || !blueprint_snippet) {
+    error = "Field Title, Slug, Description, JSON Source, Stack, dan Workflow Snippet wajib diisi.";
   } else {
     await db.insert(projects).values({
       title,
@@ -66,7 +66,7 @@ if (Astro.request.method === "POST") {
       <RichEditor name="description" label="Description" required id="description" rows={4} />
       <label class="flex flex-col gap-1.5 text-sm">
         <span class="font-medium">JSON Source URL</span>
-        <input name="json_source" type="text" required class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+        <input name="json_source" type="text" class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
       </label>
       <label class="flex flex-col gap-1.5 text-sm">
         <span class="font-medium">Stack</span>
