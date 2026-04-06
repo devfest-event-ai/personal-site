@@ -10,11 +10,12 @@ import netlify from '@astrojs/netlify';
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [icon(), partytown(), ],
+  output: 'server',
+  integrations: [icon(), partytown()],
 
   vite: {
-      plugins: [tailwindcss()],
-	},
+    plugins: [tailwindcss()],
+  },
 
   adapter: netlify(),
 });
