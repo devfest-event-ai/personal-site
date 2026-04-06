@@ -6,7 +6,7 @@ import Breadcrumb from "@/components/Breadcrumb.astro";
 import DetailNavigation from "@/components/DetailNavigation.astro";
 import { db } from "@/db";
 import { publications } from "@/db/schema";
-import { asc } from "drizzle-orm";
+import { eq, lt, gt, desc, asc } from "drizzle-orm";
 
 const { slug: paramSlug } = Astro.params;
 
@@ -20,23 +20,29 @@ function generateSlug(title: string): string {
     .replace(/^-|-$/g, '');
 }
 
-// Fetch all publications and find matching slug
-const allResult = await db
-  .select({
-    id: publications.id,
-    title: publications.title,
-    journal: publications.journal,
-    publishedDate: publications.publishedDate,
-    abstract: publications.abstract,
-    doiUrl: publications.doiUrl,
-    type: publications.type,
-  })
-  .from(publications)
-  .orderBy(asc(publications.id));
-const pubRow = allResult.find((row) => {
-  const rowSlug = generateSlug(String(row.title));
-  return rowSlug === paramSlug;
-});
+// Try to query by slug first using Drizzle
+let pubRow: typeof publications.$inferSelect | null = null;
+try {
+  const result = await db
+    .select()
+    .from(publications)
+    .where(eq(publications.slug, paramSlug))
+    .limit(1);
+  if (result.length > 0) {
+    pubRow = result[0];
+  }
+} catch {
+  // If slug column doesn't exist or query fails, fallback to fetching all and matching by title slug
+  const allPubs = await db
+    .select()
+    .from(publications)
+    .orderBy(desc(publications.publishedDate));
+  
+  pubRow = allPubs.find((p) => {
+    const titleSlug = generateSlug(String(p.title));
+    return titleSlug === paramSlug;
+  }) || null;
+}
 
 if (!pubRow) {
   return Astro.redirect("/404");
@@ -71,16 +77,43 @@ const typeLabel = typeLabels[type] ?? type;
 const authorName = "Taurisia, R. A.";
 const citation = `${authorName} (${dateObj.getFullYear()}). ${title}. ${journal}.`;
 
-// Get prev/next publications
-const pubsList = allResult.map((row) => ({
-  id: Number(row.id),
-  title: String(row.title),
-  slug: generateSlug(String(row.title)),
-}));
+// Get prev/next publications - efficient query using Drizzle
+let prevPub: { title: string; slug: string } | null = null;
+let nextPub: { title: string; slug: string } | null = null;
 
-const currentIndex = pubsList.findIndex((p) => p.slug === pubSlug);
-const prevPub = currentIndex > 0 ? pubsList[currentIndex - 1] : null;
-const nextPub = currentIndex < pubsList.length - 1 ? pubsList[currentIndex + 1] : null;
+try {
+  const prevResult = await db
+    .select({ id: publications.id, title: publications.title, slug: publications.slug, publishedDate: publications.publishedDate })
+    .from(publications)
+    .where(lt(publications.publishedDate, pubRow.publishedDate))
+    .orderBy(desc(publications.publishedDate))
+    .limit(1);
+  
+  if (prevResult.length > 0) {
+    const row = prevResult[0];
+    prevPub = {
+      title: String(row.title),
+      slug: row.slug ? String(row.slug) : generateSlug(String(row.title)),
+    };
+  }
+} catch {}
+
+try {
+  const nextResult = await db
+    .select({ id: publications.id, title: publications.title, slug: publications.slug, publishedDate: publications.publishedDate })
+    .from(publications)
+    .where(gt(publications.publishedDate, pubRow.publishedDate))
+    .orderBy(asc(publications.publishedDate))
+    .limit(1);
+  
+  if (nextResult.length > 0) {
+    const row = nextResult[0];
+    nextPub = {
+      title: String(row.title),
+      slug: row.slug ? String(row.slug) : generateSlug(String(row.title)),
+    };
+  }
+} catch {}
 
 const seo = {
   title: `${title} — Rachmawati Ari Taurisia`,
