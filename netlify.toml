@@ -1,9 +1,10 @@
 [build]
-  command = "pnpm build"
+  command = "bun run build"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "22"
+  BUN_VERSION = "1.3"
   PNPM_VERSION = "9"
   # BETTER_AUTH_URL is a public URL (not a secret), safe to appear in SSR bundle
   SECRETS_SCAN_OMIT_KEYS = "BETTER_AUTH_URL"
