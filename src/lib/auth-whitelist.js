@@ -5,6 +5,9 @@
  * Tambah atau hapus email sesuai kebutuhan.
  */
 export const ALLOWED_EMAILS = [
-  "hasban.fardani@gmail.com",
-  // tambah email lain di sini
+  "hasbanfardani@gmail.com",
+  "racharta2015@gmail.com",
+  "racharta2020@gmail.com",
+  "aritaurisia@gmail.com",
+  "forlifelonglearning9@gmail.com",
 ];

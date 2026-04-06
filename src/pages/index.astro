@@ -7,13 +7,13 @@ import { db } from "@/db";
 import { projects, writing, speaking } from "@/db/schema";
 import { asc, desc } from "drizzle-orm";
 
-const [projectsResult, writingResult, speakingResult] = await Promise.all([
+const [projectsRaw, writingResult, speakingResult] = await Promise.all([
   db.select().from(projects).orderBy(asc(projects.id)),
   db.select().from(writing).orderBy(desc(writing.publishedDate)).limit(3),
   db.select().from(speaking).orderBy(asc(speaking.id)).limit(1),
 ]);
 
-const projects = projectsResult.map((row) => ({
+const projectList = projectsRaw.map((row) => ({
   id:                Number(row.id),
   title:             String(row.title),
   slug:              String(row.slug),
@@ -50,7 +50,7 @@ const categoryColors: Record<string, string> = {
 };
 
 const stats = [
-  { value: String(projects.length), label: "n8n blueprints" },
+  { value: String(projectList.length), label: "n8n blueprints" },
   { value: "4",                     label: "publications" },
   { value: "2×",                    label: "cited as industry SME" },
   { value: "2",                     label: "research papers" },
@@ -124,7 +124,7 @@ const stats = [
 
       <!-- Cards grid -->
       <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {projects.map((project, i) => (
+        {projectList.map((project, i) => (
           <ProjectCard project={project} index={i} />
         ))}
       </div>
