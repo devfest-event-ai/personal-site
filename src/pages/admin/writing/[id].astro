@@ -1,10 +1,24 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { writing } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { requireAdminSession, validateId } from "@/lib/admin-auth";
 
 export const prerender = false;
 
-const { id } = Astro.params;
+const session = await requireAdminSession(Astro.request.headers);
+if (!session) {
+  return Astro.redirect("/admin/login");
+}
+
+const { id: idParam } = Astro.params;
+const id = validateId(idParam);
+
+if (!id) {
+  return Astro.redirect("/admin/writing");
+}
+
 let error = "";
 
 if (Astro.request.method === "POST") {
@@ -12,7 +26,7 @@ if (Astro.request.method === "POST") {
   const action = form.get("_action");
 
   if (action === "delete") {
-    await turso.execute({ sql: "DELETE FROM writing WHERE id = ?", args: [id!] });
+    await db.delete(writing).where(eq(writing.id, id));
     return Astro.redirect("/admin/writing");
   }
 
@@ -25,18 +39,15 @@ if (Astro.request.method === "POST") {
   if (!title || !category || !description || !url || !published_date) {
     error = "Semua field wajib diisi.";
   } else {
-    await turso.execute({
-      sql: "UPDATE writing SET title=?, category=?, description=?, url=?, published_date=? WHERE id=?",
-      args: [title, category, description, url, published_date, id!],
-    });
+    await db.update(writing).set({ title, category, description, url, publishedDate: published_date }).where(eq(writing.id, id));
     return Astro.redirect("/admin/writing");
   }
 }
 
-const result = await turso.execute({ sql: "SELECT * FROM writing WHERE id = ?", args: [id!] });
-if (!result.rows[0]) return Astro.redirect("/admin/writing");
+const result = await db.select().from(writing).where(eq(writing.id, id)).limit(1);
+if (!result || result.length === 0) return Astro.redirect("/admin/writing");
 
-const a = result.rows[0];
+const a = result[0];
 ---
 
 <AdminLayout title="Edit Article">

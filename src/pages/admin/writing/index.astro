@@ -1,26 +1,37 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { writing } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
+import { requireAdminSession, validateId } from "@/lib/admin-auth";
 
 export const prerender = false;
 
+// Authentication check
+const session = await requireAdminSession(Astro.request.headers);
+if (!session) {
+  return Astro.redirect("/admin/login");
+}
+
 if (Astro.request.method === "POST") {
   const form = await Astro.request.formData();
-  const id = form.get("id");
+  const id = validateId(form.get("id"));
   if (id) {
-    await turso.execute({ sql: "DELETE FROM writing WHERE id = ?", args: [id] });
+    await db.delete(writing).where(eq(writing.id, id));
   }
   return Astro.redirect("/admin/writing");
 }
 
-const result = await turso.execute("SELECT * FROM writing ORDER BY published_date DESC");
-const articles = result.rows.map((r) => ({
-  id:             Number(r.id),
-  title:          String(r.title),
-  category:       String(r.category),
-  url:            String(r.url),
-  published_date: String(r.published_date),
-}));
+const articles = await db
+  .select({
+    id: writing.id,
+    title: writing.title,
+    category: writing.category,
+    url: writing.url,
+    publishedDate: writing.publishedDate,
+  })
+  .from(writing)
+  .orderBy(desc(writing.publishedDate));
 ---
 
 <AdminLayout title="Writing">
@@ -50,7 +61,7 @@ const articles = result.rows.map((r) => ({
             <td class="px-4 py-3 font-medium">{a.title}</td>
             <td class="px-4 py-3 text-muted-foreground">{a.category}</td>
             <td class="px-4 py-3 text-muted-foreground truncate max-w-40">{a.url}</td>
-            <td class="px-4 py-3 text-muted-foreground">{a.published_date}</td>
+            <td class="px-4 py-3 text-muted-foreground">{a.publishedDate}</td>
             <td class="px-4 py-3 flex items-center gap-2">
               <a href={`/admin/writing/${a.id}`} class="text-foreground underline-offset-2 hover:underline">Edit</a>
               <form method="POST">

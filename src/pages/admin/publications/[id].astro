@@ -1,10 +1,24 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { publications } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { requireAdminSession, validateId } from "@/lib/admin-auth";
 
 export const prerender = false;
 
-const { id } = Astro.params;
+const session = await requireAdminSession(Astro.request.headers);
+if (!session) {
+  return Astro.redirect("/admin/login");
+}
+
+const { id: idParam } = Astro.params;
+const id = validateId(idParam);
+
+if (!id) {
+  return Astro.redirect("/admin/publications");
+}
+
 let error = "";
 
 if (Astro.request.method === "POST") {
@@ -12,7 +26,7 @@ if (Astro.request.method === "POST") {
   const action = form.get("_action");
 
   if (action === "delete") {
-    await turso.execute({ sql: "DELETE FROM publications WHERE id = ?", args: [id!] });
+    await db.delete(publications).where(eq(publications.id, id));
     return Astro.redirect("/admin/publications");
   }
 
@@ -26,18 +40,15 @@ if (Astro.request.method === "POST") {
   if (!title || !journal || !published_date || !abstract || !type) {
     error = "Semua field wajib diisi (kecuali DOI URL).";
   } else {
-    await turso.execute({
-      sql: "UPDATE publications SET title=?, journal=?, published_date=?, abstract=?, doi_url=?, type=? WHERE id=?",
-      args: [title, journal, published_date, abstract, doi_url || null, type, id!],
-    });
+    await db.update(publications).set({ title, journal, publishedDate: published_date, abstract, doiUrl: doi_url || null, type }).where(eq(publications.id, id));
     return Astro.redirect("/admin/publications");
   }
 }
 
-const result = await turso.execute({ sql: "SELECT * FROM publications WHERE id = ?", args: [id!] });
-if (!result.rows[0]) return Astro.redirect("/admin/publications");
+const result = await db.select().from(publications).where(eq(publications.id, id)).limit(1);
+if (!result || result.length === 0) return Astro.redirect("/admin/publications");
 
-const p = result.rows[0];
+const p = result[0];
 ---
 
 <AdminLayout title="Edit Publication">

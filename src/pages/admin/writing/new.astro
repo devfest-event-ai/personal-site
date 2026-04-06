@@ -1,8 +1,16 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { writing } from "@/db/schema";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export const prerender = false;
+
+// Authentication check
+const session = await requireAdminSession(Astro.request.headers);
+if (!session) {
+  return Astro.redirect("/admin/login");
+}
 
 let error = "";
 
@@ -12,14 +20,17 @@ if (Astro.request.method === "POST") {
   const category       = String(form.get("category") ?? "").trim();
   const description    = String(form.get("description") ?? "").trim();
   const url            = String(form.get("url") ?? "").trim();
-  const published_date = String(form.get("published_date") ?? "").trim();
+  const publishedDate  = String(form.get("published_date") ?? "").trim();
 
-  if (!title || !category || !description || !url || !published_date) {
+  if (!title || !category || !description || !url || !publishedDate) {
     error = "Semua field wajib diisi.";
   } else {
-    await turso.execute({
-      sql: "INSERT INTO writing (title, category, description, url, published_date) VALUES (?, ?, ?, ?, ?)",
-      args: [title, category, description, url, published_date],
+    await db.insert(writing).values({
+      title,
+      category,
+      description,
+      url,
+      publishedDate,
     });
     return Astro.redirect("/admin/writing");
   }

@@ -1,8 +1,16 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { speaking } from "@/db/schema";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export const prerender = false;
+
+// Authentication check
+const session = await requireAdminSession(Astro.request.headers);
+if (!session) {
+  return Astro.redirect("/admin/login");
+}
 
 let error = "";
 
@@ -10,18 +18,23 @@ if (Astro.request.method === "POST") {
   const form = await Astro.request.formData();
   const title       = String(form.get("title") ?? "").trim();
   const provider    = String(form.get("provider") ?? "").trim();
-  const event_date  = String(form.get("event_date") ?? "").trim();
+  const eventDate   = String(form.get("event_date") ?? "").trim();
   const role        = String(form.get("role") ?? "").trim();
   const description = String(form.get("description") ?? "").trim();
   const link        = String(form.get("link") ?? "").trim();
   const modules     = String(form.get("modules") ?? "").trim();
 
-  if (!title || !provider || !event_date || !role || !description) {
+  if (!title || !provider || !eventDate || !role || !description) {
     error = "Semua field wajib diisi (kecuali link dan modules).";
   } else {
-    await turso.execute({
-      sql: "INSERT INTO speaking (title, provider, event_date, role, description, link, modules) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      args: [title, provider, event_date, role, description, link || null, modules || null],
+    await db.insert(speaking).values({
+      title,
+      provider,
+      eventDate,
+      role,
+      description,
+      link: link || null,
+      modules: modules || null,
     });
     return Astro.redirect("/admin/speaking");
   }

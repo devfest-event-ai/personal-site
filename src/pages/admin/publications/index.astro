@@ -1,26 +1,37 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { publications } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
+import { requireAdminSession, validateId } from "@/lib/admin-auth";
 
 export const prerender = false;
 
+// Authentication check
+const session = await requireAdminSession(Astro.request.headers);
+if (!session) {
+  return Astro.redirect("/admin/login");
+}
+
 if (Astro.request.method === "POST") {
   const form = await Astro.request.formData();
-  const id = form.get("id");
+  const id = validateId(form.get("id"));
   if (id) {
-    await turso.execute({ sql: "DELETE FROM publications WHERE id = ?", args: [id] });
+    await db.delete(publications).where(eq(publications.id, id));
   }
   return Astro.redirect("/admin/publications");
 }
 
-const result = await turso.execute("SELECT * FROM publications ORDER BY published_date DESC");
-const pubs = result.rows.map((r) => ({
-  id:             Number(r.id),
-  title:          String(r.title),
-  journal:        String(r.journal),
-  type:           String(r.type),
-  published_date: String(r.published_date),
-}));
+const pubs = await db
+  .select({
+    id: publications.id,
+    title: publications.title,
+    journal: publications.journal,
+    type: publications.type,
+    publishedDate: publications.publishedDate,
+  })
+  .from(publications)
+  .orderBy(desc(publications.publishedDate));
 ---
 
 <AdminLayout title="Publications">
@@ -50,7 +61,7 @@ const pubs = result.rows.map((r) => ({
             <td class="px-4 py-3 font-medium">{p.title}</td>
             <td class="px-4 py-3 text-muted-foreground">{p.journal}</td>
             <td class="px-4 py-3 text-muted-foreground">{p.type}</td>
-            <td class="px-4 py-3 text-muted-foreground">{p.published_date}</td>
+            <td class="px-4 py-3 text-muted-foreground">{p.publishedDate}</td>
             <td class="px-4 py-3 flex items-center gap-2">
               <a href={`/admin/publications/${p.id}`} class="text-foreground underline-offset-2 hover:underline">Edit</a>
               <form method="POST">

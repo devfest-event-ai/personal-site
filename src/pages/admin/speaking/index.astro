@@ -1,26 +1,37 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { speaking } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
+import { requireAdminSession, validateId } from "@/lib/admin-auth";
 
 export const prerender = false;
 
+// Authentication check
+const session = await requireAdminSession(Astro.request.headers);
+if (!session) {
+  return Astro.redirect("/admin/login");
+}
+
 if (Astro.request.method === "POST") {
   const form = await Astro.request.formData();
-  const id = form.get("id");
+  const id = validateId(form.get("id"));
   if (id) {
-    await turso.execute({ sql: "DELETE FROM speaking WHERE id = ?", args: [id] });
+    await db.delete(speaking).where(eq(speaking.id, id));
   }
   return Astro.redirect("/admin/speaking");
 }
 
-const result = await turso.execute("SELECT * FROM speaking ORDER BY event_date DESC");
-const events = result.rows.map((r) => ({
-  id:         Number(r.id),
-  title:      String(r.title),
-  provider:   String(r.provider),
-  role:       String(r.role),
-  event_date: String(r.event_date),
-}));
+const events = await db
+  .select({
+    id: speaking.id,
+    title: speaking.title,
+    provider: speaking.provider,
+    role: speaking.role,
+    eventDate: speaking.eventDate,
+  })
+  .from(speaking)
+  .orderBy(desc(speaking.eventDate));
 ---
 
 <AdminLayout title="Speaking">
@@ -50,7 +61,7 @@ const events = result.rows.map((r) => ({
             <td class="px-4 py-3 font-medium">{e.title}</td>
             <td class="px-4 py-3 text-muted-foreground">{e.provider}</td>
             <td class="px-4 py-3 text-muted-foreground">{e.role}</td>
-            <td class="px-4 py-3 text-muted-foreground">{e.event_date}</td>
+            <td class="px-4 py-3 text-muted-foreground">{e.eventDate}</td>
             <td class="px-4 py-3 flex items-center gap-2">
               <a href={`/admin/speaking/${e.id}`} class="text-foreground underline-offset-2 hover:underline">Edit</a>
               <form method="POST">

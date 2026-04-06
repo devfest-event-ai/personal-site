@@ -1,8 +1,16 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { publications } from "@/db/schema";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export const prerender = false;
+
+// Authentication check
+const session = await requireAdminSession(Astro.request.headers);
+if (!session) {
+  return Astro.redirect("/admin/login");
+}
 
 let error = "";
 
@@ -10,17 +18,21 @@ if (Astro.request.method === "POST") {
   const form = await Astro.request.formData();
   const title          = String(form.get("title") ?? "").trim();
   const journal        = String(form.get("journal") ?? "").trim();
-  const published_date = String(form.get("published_date") ?? "").trim();
+  const publishedDate  = String(form.get("published_date") ?? "").trim();
   const abstract       = String(form.get("abstract") ?? "").trim();
-  const doi_url        = String(form.get("doi_url") ?? "").trim();
+  const doiUrl         = String(form.get("doi_url") ?? "").trim();
   const type           = String(form.get("type") ?? "").trim();
 
-  if (!title || !journal || !published_date || !abstract || !type) {
+  if (!title || !journal || !publishedDate || !abstract || !type) {
     error = "Semua field wajib diisi (kecuali DOI URL).";
   } else {
-    await turso.execute({
-      sql: "INSERT INTO publications (title, journal, published_date, abstract, doi_url, type) VALUES (?, ?, ?, ?, ?, ?)",
-      args: [title, journal, published_date, abstract, doi_url || null, type],
+    await db.insert(publications).values({
+      title,
+      journal,
+      publishedDate,
+      abstract,
+      doiUrl: doiUrl || null,
+      type,
     });
     return Astro.redirect("/admin/publications");
   }

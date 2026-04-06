@@ -3,14 +3,21 @@ import AdminLayout from "@/layouts/AdminLayout.astro";
 import { db } from "@/db";
 import { contacts } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
+import { requireAdminSession, validateId } from "@/lib/admin-auth";
 
 export const prerender = false;
 
+// Authentication check
+const session = await requireAdminSession(Astro.request.headers);
+if (!session) {
+  return Astro.redirect("/admin/login");
+}
+
 if (Astro.request.method === "POST") {
   const form = await Astro.request.formData();
-  const id = form.get("id");
+  const id = validateId(form.get("id"));
   if (id) {
-    await db.delete(contacts).where(eq(contacts.id, Number(id)));
+    await db.delete(contacts).where(eq(contacts.id, id));
   }
   return Astro.redirect("/admin/contacts");
 }

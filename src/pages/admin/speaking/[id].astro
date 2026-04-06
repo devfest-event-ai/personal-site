@@ -1,10 +1,24 @@
 ---
 import AdminLayout from "@/layouts/AdminLayout.astro";
-import { turso } from "@/lib/turso";
+import { db } from "@/db";
+import { speaking } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { requireAdminSession, validateId } from "@/lib/admin-auth";
 
 export const prerender = false;
 
-const { id } = Astro.params;
+const session = await requireAdminSession(Astro.request.headers);
+if (!session) {
+  return Astro.redirect("/admin/login");
+}
+
+const { id: idParam } = Astro.params;
+const id = validateId(idParam);
+
+if (!id) {
+  return Astro.redirect("/admin/speaking");
+}
+
 let error = "";
 
 if (Astro.request.method === "POST") {
@@ -12,7 +26,7 @@ if (Astro.request.method === "POST") {
   const action = form.get("_action");
 
   if (action === "delete") {
-    await turso.execute({ sql: "DELETE FROM speaking WHERE id = ?", args: [id!] });
+    await db.delete(speaking).where(eq(speaking.id, id));
     return Astro.redirect("/admin/speaking");
   }
 
@@ -27,18 +41,15 @@ if (Astro.request.method === "POST") {
   if (!title || !provider || !event_date || !role || !description) {
     error = "Semua field wajib diisi (kecuali link dan modules).";
   } else {
-    await turso.execute({
-      sql: "UPDATE speaking SET title=?, provider=?, event_date=?, role=?, description=?, link=?, modules=? WHERE id=?",
-      args: [title, provider, event_date, role, description, link || null, modules || null, id!],
-    });
+    await db.update(speaking).set({ title, provider, eventDate: event_date, role, description, link: link || null, modules: modules || null }).where(eq(speaking.id, id));
     return Astro.redirect("/admin/speaking");
   }
 }
 
-const result = await turso.execute({ sql: "SELECT * FROM speaking WHERE id = ?", args: [id!] });
-if (!result.rows[0]) return Astro.redirect("/admin/speaking");
+const result = await db.select().from(speaking).where(eq(speaking.id, id)).limit(1);
+if (!result || result.length === 0) return Astro.redirect("/admin/speaking");
 
-const e = result.rows[0];
+const e = result[0];
 ---
 
 <AdminLayout title="Edit Speaking Event">
