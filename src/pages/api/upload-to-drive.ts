@@ -110,7 +110,7 @@ export const POST: APIRoute = async ({ request }) => {
   ]);
 
   const uploadRes = await fetch(
-    "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",
+    "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id&supportsAllDrives=true",
     {
       method: "POST",
       headers: {
@@ -132,7 +132,7 @@ export const POST: APIRoute = async ({ request }) => {
   const { id: fileId } = (await uploadRes.json()) as { id: string };
 
   const permRes = await fetch(
-    `https://www.googleapis.com/drive/v3/files/${fileId}/permissions`,
+    `https://www.googleapis.com/drive/v3/files/${fileId}/permissions?supportsAllDrives=true`,
     {
       method: "POST",
       headers: {
