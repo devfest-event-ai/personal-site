@@ -80,18 +80,31 @@ const a = result[0];
       </label>
       <label class="flex flex-col gap-1.5 text-sm">
         <span class="font-medium">Published Date</span>
-        <input name="published_date" type="date" required value={String(a.published_date)} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+        <input name="published_date" type="date" required value={String(a.publishedDate)} class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
       </label>
       <div class="flex gap-3 pt-2">
-        <button type="submit" class="px-5 py-2 bg-foreground text-background text-sm rounded-md hover:opacity-90 transition-opacity">Save</button>
-        <a href="/admin/writing" class="px-5 py-2 border border-border rounded-md text-sm hover:bg-accent transition-colors">Cancel</a>
+        <button type="submit" class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save
+        </button>
+        <a href="/admin/writing" class="inline-flex items-center rounded-md border border-border px-5 py-2.5 text-sm font-medium text-foreground hover:bg-accent transition-colors">Cancel</a>
       </div>
     </form>
 
-    <form method="POST" class="mt-4">
-      <input type="hidden" name="_action" value="delete" />
-      <button type="submit" class="text-sm text-destructive hover:underline underline-offset-2"
-        onclick="return confirm('Delete this article?')">Delete article</button>
-    </form>
+    <!-- Danger zone -->
+    <div class="mt-6 pt-6 border-t border-border">
+      <p class="text-sm text-muted-foreground mb-3">Danger zone</p>
+      <form method="POST">
+        <input type="hidden" name="_action" value="delete" />
+        <button
+          type="submit"
+          onclick="return confirm('Delete this article? This cannot be undone.')"
+          class="inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Delete article
+        </button>
+      </form>
+    </div>
   </div>
 </AdminLayout>
