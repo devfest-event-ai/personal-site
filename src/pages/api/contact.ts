@@ -3,7 +3,7 @@ import { contacts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import type { APIRoute } from "astro";
 
-const TURNSTILE_SECRET = import.meta.env.TURNSTILE_SECRET_KEY ?? "";
+const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY ?? "";
 const RATE_LIMIT_SECONDS = 60;
 
 async function verifyTurnstile(token: string, ip: string): Promise<boolean> {

@@ -3,7 +3,7 @@ export const prerender = false;
 
 import Layout from "@/layouts/Layout.astro";
 
-const turnstileSiteKey = import.meta.env.TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA";
+const turnstileSiteKey = process.env.TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA";
 ---
 
 <Layout
