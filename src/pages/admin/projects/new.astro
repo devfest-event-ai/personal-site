@@ -1,4 +1,6 @@
 ---
+import { getSecret } from "astro:env/server";
+import GoogleDrivePicker from "@/components/GoogleDrivePicker.tsx";
 import RichEditor from "@/components/RichEditor.astro";
 import { db } from "@/db";
 import { projects } from "@/db/schema";
@@ -13,7 +15,10 @@ if (!session) {
   return Astro.redirect("/admin/login");
 }
 
-let error = "";
+const pickerApiKey = getSecret("GOOGLE_PICKER_API_KEY") ?? "";
+const googleClientId = getSecret("GOOGLE_CLIENT_ID") ?? "";
+
+let _error = "";
 
 if (Astro.request.method === "POST") {
   const form = await Astro.request.formData();
@@ -30,7 +35,7 @@ if (Astro.request.method === "POST") {
   const preview_url = String(form.get("preview_url") ?? "").trim();
 
   if (!title || !slug || !description || !stack || !preview_url) {
-    error = "Field Title, Slug, Description, Stack, dan Preview wajib diisi.";
+    _error = "Field Title, Slug, Description, Stack, dan Preview wajib diisi.";
   } else {
     await db.insert(projects).values({
       title,
@@ -52,7 +57,7 @@ if (Astro.request.method === "POST") {
     </div>
 
     {error && (
-      <div class="mb-4 rounded-md bg-destructive/10 border border-destructive/30 text-destructive text-sm px-4 py-3">{error}</div>
+      <div class="mb-4 rounded-md bg-destructive/10 border border-destructive/30 text-destructive text-sm px-4 py-3">{_error}</div>
     )}
 
     <form method="POST" class="bg-card border border-border rounded-xl p-6 flex flex-col gap-4">
@@ -105,10 +110,16 @@ if (Astro.request.method === "POST") {
         <!-- Input fields -->
         <div id="pv-input" class="flex gap-2">
           <input id="pv-url" name="preview_url" type="url" placeholder="https://drive.google.com/... atau https://youtube.com/..." class="flex-1 px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
-          <button type="button" id="pv-drive-btn" class="px-3 py-2 rounded-md border border-border bg-accent text-foreground text-xs font-medium hover:bg-accent/70 transition-colors whitespace-nowrap flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 22.5H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h10l5 5v5.5"/><path d="M14 22v-6h6"/></svg>
-            Pick from Drive
-          </button>
+          <GoogleDrivePicker
+            client:only="react"
+            apiKey={pickerApiKey}
+            clientId={googleClientId}
+            onSelect={(url: string) => {
+              const input = document.getElementById("pv-url") as HTMLInputElement;
+              if (input) input.value = url;
+              input?.dispatchEvent(new Event("input", { bubbles: true }));
+            }}
+          />
         </div>
 
         <div id="pv-error" class="hidden text-xs text-destructive"></div>
@@ -171,7 +182,6 @@ const pvYt       = document.getElementById("pv-yt") as HTMLDivElement;
 const pvYtLabel  = document.getElementById("pv-yt-label") as HTMLSpanElement;
 const pvRemove   = document.getElementById("pv-remove") as HTMLButtonElement;
 const pvError    = document.getElementById("pv-error") as HTMLDivElement;
-const pvDriveBtn = document.getElementById("pv-drive-btn") as HTMLButtonElement;
 
 function isYouTubeUrl(url: string): boolean {
   return /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)/i.test(url);
@@ -243,10 +253,5 @@ pvRemove.addEventListener("click", () => {
   pvInput.classList.remove("hidden");
   pvImg.src = "";
   pvError.classList.add("hidden");
-});
-
-pvDriveBtn.addEventListener("click", () => {
-  pvError.textContent = "Google Drive Picker requires API key setup. Paste Google Drive file link directly.";
-  pvError.classList.remove("hidden");
 });
 </script>
