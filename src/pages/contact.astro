@@ -1,14 +1,15 @@
 ---
 export const prerender = false;
 
+import { getSecret } from "astro:env/server";
 import Layout from "@/layouts/Layout.astro";
 
 const turnstileSiteKey =
-  process.env.TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA";
+  getSecret("TURNSTILE_SITE_KEY") ?? "1x00000000000000000000AA";
 ---
 
 <Layout
-  title="Contact — Rachmawati Ari Taurisia"
+  title="Contact: Rachmawati Ari Taurisia"
   description="Get in touch with Rachmawati Ari Taurisia for collaboration on AI curriculum design, n8n workflow automation workshops, or consulting engagements."
 >
   <main>

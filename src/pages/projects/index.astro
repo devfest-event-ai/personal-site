@@ -23,21 +23,57 @@ const projects = result.map((row) => ({
 }));
 
 const fadeBack = {
-  old: { name: "vt-out", duration: "0.15s", easing: "ease-in",  fillMode: "both" },
-  new: { name: "vt-in",  duration: "0.2s",  easing: "ease-out", fillMode: "both" },
+  old: {
+    name: "vt-out",
+    duration: "0.15s",
+    easing: "ease-in",
+    fillMode: "both",
+  },
+  new: {
+    name: "vt-in",
+    duration: "0.2s",
+    easing: "ease-out",
+    fillMode: "both",
+  },
 };
 const animDown: TransitionDirectionalAnimations = {
-  forwards:  { old: { name: "vt-out",  duration: "0.15s", easing: "ease-in",  fillMode: "both" }, new: { name: "vt-down", duration: "0.35s", easing: "ease-out", fillMode: "both" } },
+  forwards: {
+    old: {
+      name: "vt-out",
+      duration: "0.15s",
+      easing: "ease-in",
+      fillMode: "both",
+    },
+    new: {
+      name: "vt-down",
+      duration: "0.35s",
+      easing: "ease-out",
+      fillMode: "both",
+    },
+  },
   backwards: fadeBack,
 };
 const animUp0: TransitionDirectionalAnimations = {
-  forwards:  { old: { name: "vt-out", duration: "0.15s", easing: "ease-in",  fillMode: "both" }, new: { name: "vt-up", duration: "0.45s", easing: "ease-out", fillMode: "both" } },
+  forwards: {
+    old: {
+      name: "vt-out",
+      duration: "0.15s",
+      easing: "ease-in",
+      fillMode: "both",
+    },
+    new: {
+      name: "vt-up",
+      duration: "0.45s",
+      easing: "ease-out",
+      fillMode: "both",
+    },
+  },
   backwards: fadeBack,
 };
 ---
 
 <Layout
-  title="Automation Workflows — Rachmawati Ari Taurisia"
+  title="Automation Workflows: Rachmawati Ari Taurisia"
   description="Production-ready n8n workflow automations built for real-world productivity: invoice extraction, AI chatbots, and multi-persona task orchestration."
 >
   <main>
@@ -61,11 +97,11 @@ const animUp0: TransitionDirectionalAnimations = {
             </h1>
             <p class="max-w-xl text-base leading-relaxed text-muted-foreground">
               Real automations built for real problems. Each workflow is fully
-              documented with node-by-node structure — no credentials, no fluff.
+              documented with node-by-node structure and no credentials, no fluff.
             </p>
           </div>
 
-          <!-- Inline stats — right side on desktop -->
+          <!-- Inline stats: right side on desktop -->
           <div class="flex shrink-0 items-center gap-8 lg:flex-col lg:items-end lg:gap-3">
             <div class="lg:text-right">
               <p class="text-4xl font-bold tracking-tight text-foreground">{projects.length}</p>

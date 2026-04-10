@@ -1,3 +1,4 @@
+import { getSecret } from "astro:env/server";
 import type { APIRoute } from "astro";
 import { createSign } from "crypto";
 import { requireAdminSession } from "@/lib/admin-auth";
@@ -53,9 +54,9 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const rawKey = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
-  const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+  const email = getSecret("GOOGLE_SERVICE_ACCOUNT_EMAIL");
+  const rawKey = getSecret("GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY");
+  const folderId = getSecret("GOOGLE_DRIVE_FOLDER_ID");
 
   if (!email || !rawKey) {
     return new Response(

@@ -80,7 +80,7 @@ const allProjects = await db
               {p.screenshotUrl ? (
                 <img src={String(p.screenshotUrl)} alt="" class="h-8 w-14 rounded object-cover border border-border" loading="lazy" />
               ) : (
-                <span class="text-xs text-muted-foreground/50">—</span>
+                <span class="text-xs text-muted-foreground/50">none</span>
               )}
             </td>
             <td class="px-4 py-3">

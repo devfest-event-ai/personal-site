@@ -1,9 +1,10 @@
+import { getSecret } from "astro:env/server";
 import type { APIRoute } from "astro";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { contacts } from "@/db/schema";
 
-const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY ?? "";
+const TURNSTILE_SECRET = getSecret("TURNSTILE_SECRET_KEY") ?? "";
 const RATE_LIMIT_SECONDS = 60;
 
 async function verifyTurnstile(token: string, ip: string): Promise<boolean> {

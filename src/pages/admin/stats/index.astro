@@ -44,7 +44,10 @@ if (Astro.request.method === "POST") {
     const label = String(form.get("label") ?? "").trim();
     const sortOrder = Number(form.get("sort_order") ?? 0);
     if (id && value && label) {
-      await db.update(stats).set({ value, label, sortOrder }).where(eq(stats.id, id));
+      await db
+        .update(stats)
+        .set({ value, label, sortOrder })
+        .where(eq(stats.id, id));
     }
     return Astro.redirect("/admin/stats");
   }
@@ -64,7 +67,7 @@ const allStats = await db
     </div>
 
     <p class="text-sm text-muted-foreground mb-6">
-      Angka-angka kredibilitas yang tampil di halaman utama. Value bebas — bisa angka, persen, singkatan (mis. "60%", "2×", "10K+").
+      Angka-angka kredibilitas yang tampil di halaman utama. Value bebas, bisa angka, persen, singkatan (mis. "60%", "2×", "10K+").
     </p>
 
     <!-- Current stats table -->

@@ -20,15 +20,21 @@ if (!session) {
   return Astro.redirect("/admin/login");
 }
 
-const [projectCount, writingCount, pubCount, speakingCount, contactCount, statsCount] =
-  await Promise.all([
-    db.select({ count: count() }).from(projects),
-    db.select({ count: count() }).from(writing),
-    db.select({ count: count() }).from(publications),
-    db.select({ count: count() }).from(speaking),
-    db.select({ count: count() }).from(contacts),
-    db.select({ count: count() }).from(stats),
-  ]);
+const [
+  projectCount,
+  writingCount,
+  pubCount,
+  speakingCount,
+  contactCount,
+  statsCount,
+] = await Promise.all([
+  db.select({ count: count() }).from(projects),
+  db.select({ count: count() }).from(writing),
+  db.select({ count: count() }).from(publications),
+  db.select({ count: count() }).from(speaking),
+  db.select({ count: count() }).from(contacts),
+  db.select({ count: count() }).from(stats),
+]);
 
 const counts = {
   projects: projectCount[0]?.count ?? 0,
