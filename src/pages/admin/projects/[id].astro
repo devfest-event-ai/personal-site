@@ -44,18 +44,10 @@ if (Astro.request.method === "POST") {
       .filter(Boolean),
   );
   const screenshot_url = String(form.get("screenshot_url") ?? "").trim();
-  const blueprint_snippet = String(form.get("blueprint_snippet") ?? "").trim();
 
-  if (
-    !title ||
-    !slug ||
-    !description ||
-    !json_source ||
-    !stack ||
-    !blueprint_snippet
-  ) {
+  if (!title || !slug || !description || !json_source || !stack) {
     error =
-      "Field Title, Slug, Description, JSON Source, Stack, dan Workflow Snippet wajib diisi.";
+      "Field Title, Slug, Description, JSON Source, dan Stack wajib diisi.";
   } else {
     await db
       .update(projects)
@@ -66,7 +58,6 @@ if (Astro.request.method === "POST") {
         jsonSource: json_source,
         stack,
         screenshotUrl: screenshot_url,
-        blueprintSnippet: blueprint_snippet,
       })
       .where(eq(projects.id, id));
     return Astro.redirect("/admin/projects");
@@ -174,11 +165,6 @@ const existingScreenshot = String(p.screenshotUrl ?? "");
         <input type="hidden" name="screenshot_url" id="ss-url" value={existingScreenshot} />
       </div>
 
-      <label class="flex flex-col gap-1.5 text-sm">
-        <span class="font-medium">Workflow Snippet</span>
-        <span class="text-xs text-muted-foreground">Paste JSON n8n workflow (export dari n8n → Copy to clipboard)</span>
-        <textarea name="blueprint_snippet" required rows="6" class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30 resize-y font-mono text-xs">{String(p.blueprintSnippet)}</textarea>
-      </label>
       <div class="flex gap-3 pt-2">
         <button type="submit" class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>

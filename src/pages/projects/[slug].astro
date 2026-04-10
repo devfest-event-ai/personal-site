@@ -3,7 +3,6 @@ export const prerender = false;
 
 import type { TransitionDirectionalAnimations } from "astro";
 import { asc, eq } from "drizzle-orm";
-import BlueprintViewer from "@/components/BlueprintViewer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import DetailNavigation from "@/components/DetailNavigation.astro";
 import { db } from "@/db";
@@ -31,7 +30,6 @@ const projectId = Number(project.id);
 const title = String(project.title);
 const description = String(project.description);
 const screenshotUrl = String(project.screenshotUrl);
-const blueprintSnippet = String(project.blueprintSnippet);
 const stack = String(project.stack);
 
 let stackTags: string[] = [];
@@ -277,27 +275,9 @@ const seo = {
       </div>
     </section>
 
-    <!-- Workflow Viewer: fades up (delay 2) -->
+    <!-- Navigation: fades up (delay 2) -->
     <section
       transition:animate={animUp2}
-      class="mx-auto max-w-4xl px-4 pb-16 sm:px-6"
-    >
-      <div class="rounded-2xl border border-border/50 bg-card shadow-sm">
-        <div class="border-b border-border/40 bg-primary/5 px-6 py-4">
-          <div class="flex items-center justify-between">
-            <span class="text-sm font-semibold text-foreground">n8n Workflow</span>
-            <span class="text-xs text-muted-foreground/60">Sanitized, no credentials</span>
-          </div>
-        </div>
-        <div class="p-6">
-          <BlueprintViewer snippet={blueprintSnippet} projectId={slug} />
-        </div>
-      </div>
-    </section>
-
-    <!-- Navigation: fades up (delay 3) -->
-    <section
-      transition:animate={animUp3}
       class="mx-auto max-w-4xl px-4 pb-16 sm:px-6"
     >
       <DetailNavigation

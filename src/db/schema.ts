@@ -10,7 +10,6 @@ export const projects = sqliteTable("projects", {
   jsonSource: text("json_source").notNull(),
   stack: text("stack").notNull(),
   screenshotUrl: text("screenshot_url").notNull(),
-  blueprintSnippet: text("blueprint_snippet").notNull(),
 });
 
 export const writing = sqliteTable("writing", {
