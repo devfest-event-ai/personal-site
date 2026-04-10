@@ -23,9 +23,8 @@ const projectList = projectsRaw.map((row) => ({
   title: String(row.title),
   slug: String(row.slug),
   description: String(row.description),
-  json_source: String(row.jsonSource),
   stack: String(row.stack),
-  screenshot_url: String(row.screenshotUrl),
+  preview_url: String(row.previewUrl),
 }));
 
 const articles = writingResult.map((row) => ({
