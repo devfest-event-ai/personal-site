@@ -118,10 +118,10 @@ const animUp0: TransitionDirectionalAnimations = {
     <!-- Projects grid -->
     <section
       transition:animate={animUp0}
-      class="mx-auto max-w-4xl px-4 py-16 sm:px-6"
+      class="mx-auto max-w-6xl px-4 py-16 sm:px-6"
     >
       {projects.length > 0 ? (
-        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((project, i) => (
             <ProjectCard project={project} index={i} />
           ))}
