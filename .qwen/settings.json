@@ -9,7 +9,8 @@
       "Bash(bunx *)",
       "WebFetch(astro.build)",
       "WebFetch(developers.cloudflare.com)",
-      "WebFetch(alexbobes.com)"
+      "WebFetch(alexbobes.com)",
+      "WebFetch(medium.com)"
     ]
   },
   "$version": 3
