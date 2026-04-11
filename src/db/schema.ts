@@ -9,6 +9,7 @@ export const projects = sqliteTable("projects", {
   description: text("description").notNull(),
   stack: text("stack").notNull(),
   previewUrl: text("preview_url").notNull(),
+  urlSource: text("url_source"),
 });
 
 export const writing = sqliteTable("writing", {

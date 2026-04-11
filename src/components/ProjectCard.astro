@@ -6,6 +6,7 @@ interface Project {
   description: string;
   stack: string;
   preview_url: string;
+  url_source: string;
 }
 
 interface Props {
@@ -36,6 +37,7 @@ function getYouTubeId(url: string): string | null {
 }
 
 function convertDriveLink(url: string): string {
+  // Handle /file/d/ID/view format
   const match = url.match(/\/file\/d\/([^/]+)/);
   if (match) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
   return url;
@@ -47,6 +49,7 @@ const hasPreview = Boolean(
   project.preview_url?.trim() && project.preview_url !== "null",
 );
 const displayImageUrl = isYouTube ? "" : convertDriveLink(project.preview_url);
+const hasSource = Boolean(project.url_source?.trim());
 
 // Strip HTML tags and truncate for card preview
 const plainDescription = project.description
@@ -70,15 +73,8 @@ const stackName = `proj-stack-${project.slug}`;
 >
   <!-- Preview: image or YouTube thumbnail -->
   <a href={`/projects/${project.slug}`} class="relative block aspect-[16/9] overflow-hidden bg-muted">
-
     {hasPreview ? (
       <>
-        <!-- Shimmer skeleton: hidden once image loads -->
-        <div
-          class="img-skeleton pointer-events-none absolute inset-0 z-10 animate-pulse bg-gradient-to-r from-muted via-border/40 to-muted bg-[length:200%_100%]"
-          aria-hidden="true"
-        ></div>
-
         {ytId ? (
           <img
             transition:name={imgName}
@@ -88,9 +84,7 @@ const stackName = `proj-stack-${project.slug}`;
             decoding="async"
             width="800"
             height="450"
-            class="relative z-20 h-full w-full object-cover opacity-0 transition-all duration-500 group-hover:scale-[1.02]"
-            onload="this.classList.add('opacity-100'); this.previousElementSibling?.classList.add('hidden')"
-            onerror="this.classList.add('hidden'); this.previousElementSibling?.classList.add('hidden'); this.closest('.relative').querySelector('.img-placeholder')?.classList.remove('hidden')"
+            class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
           />
         ) : (
           <img
@@ -101,20 +95,19 @@ const stackName = `proj-stack-${project.slug}`;
             decoding="async"
             width="800"
             height="450"
-            class="relative z-20 h-full w-full object-cover opacity-0 transition-all duration-500 group-hover:scale-[1.02]"
-            onload="this.classList.add('opacity-100'); this.previousElementSibling?.classList.add('hidden')"
-            onerror="this.classList.add('hidden'); this.previousElementSibling?.classList.add('hidden'); this.closest('.relative').querySelector('.img-placeholder')?.classList.remove('hidden')"
+            class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
           />
         )}
 
-        <!-- Error fallback placeholder (hidden by default) -->
-        <div class="img-placeholder absolute inset-0 z-30 hidden">
-          <div class="flex h-full flex-col items-center justify-center gap-3 bg-muted/80 px-4 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground/40">
-              <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/><circle cx="15" cy="15" r="1" fill="currentColor"/>
-            </svg>
-            <span class="text-xs text-muted-foreground/50">Preview not available</span>
-          </div>
+        <!-- Fallback overlay if image fails -->
+        <div
+          class="absolute inset-0 z-10 hidden flex-col items-center justify-center gap-2 bg-muted/90"
+          id={`card-fallback-${project.slug}`}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground/40">
+            <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/><circle cx="15" cy="15" r="1" fill="currentColor"/>
+          </svg>
+          <span class="text-xs text-muted-foreground/50">Preview not available</span>
         </div>
       </>
     ) : (
@@ -148,6 +141,31 @@ const stackName = `proj-stack-${project.slug}`;
           {tag}
         </span>
       ))}
+      {hasSource && (
+        <a
+          href={project.url_source}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1 rounded-md border border-border/50 bg-muted/60 px-2.5 py-0.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+          Source
+        </a>
+      )}
     </div>
   </div>
 </article>
+
+<script>
+  // Hide image and show fallback on error
+  document.querySelectorAll<HTMLImageElement>('article [transition\\:name^="proj-img-"]').forEach((img) => {
+    img.addEventListener('error', () => {
+      img.classList.add('hidden');
+      const fallback = img.nextElementSibling as HTMLElement | null;
+      if (fallback?.classList.contains('flex-col')) {
+        fallback.classList.remove('hidden');
+        fallback.classList.add('flex');
+      }
+    });
+  });
+</script>

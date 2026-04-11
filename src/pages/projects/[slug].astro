@@ -31,6 +31,8 @@ const title = String(project.title);
 const description = String(project.description);
 const previewUrl = String(project.previewUrl);
 const stack = String(project.stack);
+const urlSource = String(project.urlSource ?? "");
+const hasSource = Boolean(urlSource.trim());
 
 let stackTags: string[] = [];
 try {
@@ -251,6 +253,17 @@ const seo = {
               {tag}
             </span>
           ))}
+          {hasSource && (
+            <a
+              href={urlSource}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 rounded-md border border-border/50 bg-muted/60 px-2.5 py-0.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+              Source
+            </a>
+          )}
         </div>
       </div>
     </section>

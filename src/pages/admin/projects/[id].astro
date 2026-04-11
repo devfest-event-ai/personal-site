@@ -40,7 +40,6 @@ if (Astro.request.method === "POST") {
   const title = String(form.get("title") ?? "").trim();
   const slug = String(form.get("slug") ?? "").trim();
   const description = String(form.get("description") ?? "").trim();
-  const json_source = String(form.get("json_source") ?? "").trim();
   const stackRaw = String(form.get("stack") ?? "").trim();
   const stack = JSON.stringify(
     stackRaw
@@ -49,6 +48,7 @@ if (Astro.request.method === "POST") {
       .filter(Boolean),
   );
   const preview_url = String(form.get("preview_url") ?? "").trim();
+  const url_source = String(form.get("url_source") ?? "").trim() || null;
 
   if (!title || !slug || !description || !stack || !preview_url) {
     _error = "Field Title, Slug, Description, Stack, dan Preview wajib diisi.";
@@ -61,6 +61,7 @@ if (Astro.request.method === "POST") {
         description,
         stack,
         previewUrl: preview_url,
+        urlSource: url_source,
       })
       .where(eq(projects.id, id));
     return Astro.redirect("/admin/projects");
@@ -159,6 +160,12 @@ const existingPreview = String(p.previewUrl ?? "");
 
         <div id="pv-error" class="hidden text-xs text-destructive"></div>
       </div>
+
+      <label class="flex flex-col gap-1.5 text-sm">
+        <span class="font-medium">Source URL <span class="text-muted-foreground font-normal">(opsional)</span></span>
+        <input name="url_source" type="url" value={p.urlSource ? String(p.urlSource) : ""} placeholder="https://github.com/username/repo" class="px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30" />
+        <span class="text-xs text-muted-foreground">Link ke GitHub repo atau sumber kode lainnya</span>
+      </label>
 
       <div class="flex gap-3 pt-2">
         <button type="submit" class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition-colors">

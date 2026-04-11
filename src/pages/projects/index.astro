@@ -18,6 +18,7 @@ const projects = result.map((row) => ({
   description: String(row.description),
   stack: String(row.stack),
   preview_url: String(row.previewUrl),
+  url_source: String(row.urlSource ?? ""),
 }));
 
 const fadeBack = {
