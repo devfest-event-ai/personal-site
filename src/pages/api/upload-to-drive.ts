@@ -1,6 +1,6 @@
 import { getSecret } from "astro:env/server";
+import { createSign } from "node:crypto";
 import type { APIRoute } from "astro";
-import { createSign } from "crypto";
 import { requireAdminSession } from "@/lib/admin-auth";
 
 function createJWT(email: string, privateKey: string): string {

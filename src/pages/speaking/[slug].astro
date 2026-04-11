@@ -7,6 +7,7 @@ import DetailNavigation from "@/components/DetailNavigation.astro";
 import { db } from "@/db";
 import { speaking } from "@/db/schema";
 import Layout from "@/layouts/Layout.astro";
+import { isUpcoming } from "@/lib/date-utils";
 
 const { slug: paramSlug } = Astro.params;
 
@@ -65,6 +66,8 @@ const fullDate = dateObj.toLocaleDateString("id-ID", {
   month: "long",
   day: "numeric",
 });
+
+const upcoming = isUpcoming(eventDate);
 
 let prevEvent: { title: string; slug: string } | null = null;
 let nextEvent: { title: string; slug: string } | null = null;
@@ -193,28 +196,43 @@ const seo = {
 
     <!-- CTA Section -->
     <section class="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <div
-        data-animate
-        class="rounded-2xl border border-border/40 bg-muted/20 p-8 text-center sm:p-12"
-      >
-        <h2 class="mb-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          Interested in this workshop?
-        </h2>
-        <p class="mb-6 text-base text-muted-foreground">
-          Join the next session and leave with 2 working automations built from scratch.
-        </p>
-        <a
-          href={link}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90 hover:shadow-md hover:shadow-primary/20"
+      {upcoming ? (
+        <div
+          data-animate
+          class="rounded-2xl border border-border/40 bg-muted/20 p-8 text-center sm:p-12"
         >
-          Daftar Workshop
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
-          </svg>
-        </a>
-      </div>
+          <h2 class="mb-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Interested in this workshop?
+          </h2>
+          <p class="mb-6 text-base text-muted-foreground">
+            Join the next session and leave with 2 working automations built from scratch.
+          </p>
+          <a
+            href={link}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90 hover:shadow-md hover:shadow-primary/20"
+          >
+            Daftar Workshop
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+            </svg>
+          </a>
+        </div>
+      ) : (
+        <div
+          data-animate
+          class="rounded-2xl border border-border/40 bg-muted/20 p-8 text-center sm:p-12"
+        >
+          <h2 class="mb-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Event Completed
+          </h2>
+          <p class="text-base text-muted-foreground">
+            This workshop has already been delivered on {fullDate}.
+            Contact us to learn about upcoming sessions or request a private run.
+          </p>
+        </div>
+      )}
     </section>
 
     <!-- Navigation -->
