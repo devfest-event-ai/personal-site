@@ -1,10 +1,10 @@
-import { createClient } from "@libsql/client/web";
+import { getSecret } from "astro:env/server";
+import { createClient } from "@libsql/client";
 
-export const turso = createClient({
-  url:
-    process.env.TURSO_DATABASE_URL ??
-    (import.meta.env.TURSO_DATABASE_URL as string),
-  authToken:
-    process.env.TURSO_AUTH_TOKEN ??
-    (import.meta.env.TURSO_AUTH_TOKEN as string | undefined),
-});
+function getClient() {
+  const url = getSecret("TURSO_DATABASE_URL") ?? "file:local.db";
+  const authToken = getSecret("TURSO_AUTH_TOKEN") ?? undefined;
+  return createClient({ url, authToken });
+}
+
+export const turso = getClient();

@@ -1,11 +1,11 @@
 ---
-// Hero.astro — on-load animations via tw-animate-css (animate-in classes)
-// Scroll animations are handled by Layout.astro's IntersectionObserver
+// Hero.astro: on-load animations via tw-animate-css (animate-in classes)
+// Scroll animations are handled by Layout.astro IntersectionObserver
 ---
 
 <section class="relative flex min-h-[calc(100svh-65px)] flex-col items-center justify-center overflow-hidden px-4 py-24 text-center sm:px-6">
 
-  <!-- Subtle grid background — no glow blob -->
+  <!-- Subtle grid background, no glow blob -->
   <div
     class="pointer-events-none absolute inset-0 -z-10 opacity-[0.025]"
     style="background-image: linear-gradient(var(--color-foreground) 1px, transparent 1px), linear-gradient(90deg, var(--color-foreground) 1px, transparent 1px); background-size: 64px 64px;"
@@ -16,21 +16,21 @@
     AI & Automation Curriculum Architect · n8n · Workflow Design
   </p>
 
-  <!-- Name — primary, no "Hi, I'm" -->
+  <!-- Name: primary, no "Hi, I'm" -->
   <h1 class="animate-in fade-in slide-in-from-top-4 duration-700 mb-4 text-5xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
     Rachmawati<br><span class="text-primary">Ari Taurisia</span>
   </h1>
 
-  <!-- Role — static, clean, no typewriter -->
+  <!-- Role: static, clean, no typewriter -->
   <p class="animate-in fade-in duration-700 [animation-delay:200ms] mb-8 text-lg font-medium text-muted-foreground sm:text-xl">
     AI &amp; Automation Curriculum Architect
   </p>
 
-  <!-- Description — specific, not buzzword-heavy -->
+  <!-- Description: specific, not buzzword-heavy -->
   <p class="animate-in fade-in slide-in-from-bottom-4 duration-700 [animation-delay:400ms] mx-auto mb-10 max-w-[540px] text-base leading-relaxed text-muted-foreground">
     I build n8n workflows that solve real operational problems and teach professionals
     to automate what they repeat every day.
-    Everything here is production-ready — not demos.
+    Everything here is production-ready, not demos.
   </p>
 
   <!-- CTA buttons -->

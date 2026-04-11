@@ -1,8 +1,8 @@
 ---
 import "@/styles/starwind.css";
+import { ClientRouter } from "astro:transitions";
 import { SEO } from "astro-seo";
 import Navbar from "@/components/Navbar.astro";
-import { ClientRouter } from "astro:transitions";
 
 interface Props {
   title?: string;
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const {
-  title = "Rachmawati Ari Taurisia — AI & Automation Curriculum Architect",
+  title = "Rachmawati Ari Taurisia: AI & Automation Curriculum Architect",
   description = "AI & Automation Curriculum Engineer and n8n Specialist. I design production-ready workflow automations and GenAI-powered curricula for professionals and businesses in Indonesia.",
 } = Astro.props;
 
@@ -58,33 +58,57 @@ const personSchema = {
       }}
       extend={{
         meta: [
-          { name: "keywords", content: "AI Automation Curriculum Engineer, n8n Specialist, GenAI Productivity Expert, Workflow Automation Indonesia, Curriculum Designer AI" },
+          {
+            name: "keywords",
+            content:
+              "AI Automation Curriculum Engineer, n8n Specialist, GenAI Productivity Expert, Workflow Automation Indonesia, Curriculum Designer AI",
+          },
           { name: "author", content: "Rachmawati Ari Taurisia" },
         ],
       }}
     />
 
     <!-- JSON-LD: Person schema -->
-    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(personSchema)}
+    />
 
     <ClientRouter />
 
     <style is:global>
-      /* ── View Transition keyframes ─────────────────────────────────────────── */
       @keyframes vt-out {
-        to { opacity: 0; }
+        to {
+          opacity: 0;
+        }
       }
       @keyframes vt-in {
-        from { opacity: 0; }
-        to { opacity: 1; }
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
       }
       @keyframes vt-up {
-        from { opacity: 0; transform: translateY(14px); }
-        to { opacity: 1; transform: none; }
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
       }
       @keyframes vt-down {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: none; }
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
       }
     </style>
   </head>
@@ -96,36 +120,92 @@ const personSchema = {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <!-- Brand -->
           <div>
-            <h3 class="text-lg font-semibold text-foreground mb-3">Rachmawati Ari Taurisia</h3>
-            <p class="text-sm text-muted-foreground">AI & Automation Curriculum Architect</p>
-            <p class="text-sm text-muted-foreground mt-2">Designing production-ready workflow automations and GenAI-powered curricula for professionals and businesses in Indonesia.</p>
+            <h3 class="text-lg font-semibold text-foreground mb-3">
+              Rachmawati Ari Taurisia
+            </h3>
+            <p class="text-sm text-muted-foreground">
+              AI & Automation Curriculum Architect
+            </p>
+            <p class="text-sm text-muted-foreground mt-2">
+              Designing production-ready workflow automations and GenAI-powered
+              curricula for professionals and businesses in Indonesia.
+            </p>
           </div>
 
           <!-- Quick Links -->
           <div>
-            <h4 class="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">Quick Links</h4>
+            <h4
+              class="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide"
+            >
+              Quick Links
+            </h4>
             <ul class="space-y-2">
-              <li><a href="/" class="text-sm text-muted-foreground hover:text-primary transition-colors">Home</a></li>
-              <li><a href="/#about" class="text-sm text-muted-foreground hover:text-primary transition-colors">About</a></li>
-              <li><a href="/#projects" class="text-sm text-muted-foreground hover:text-primary transition-colors">Projects</a></li>
-              <li><a href="/#contact" class="text-sm text-muted-foreground hover:text-primary transition-colors">Contact</a></li>
+              <li>
+                <a
+                  href="/"
+                  class="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >Home</a>
+              </li>
+              <li>
+                <a
+                  href="/#about"
+                  class="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >About</a>
+              </li>
+              <li>
+                <a
+                  href="/#projects"
+                  class="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >Projects</a>
+              </li>
+              <li>
+                <a
+                  href="/#contact"
+                  class="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >Contact</a>
+              </li>
             </ul>
           </div>
 
           <!-- Connect -->
           <div>
-            <h4 class="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">Connect</h4>
+            <h4
+              class="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide"
+            >
+              Connect
+            </h4>
             <ul class="space-y-2">
-              <li><a href="https://www.linkedin.com/in/racharta" target="_blank" rel="noopener noreferrer" class="text-sm text-muted-foreground hover:text-primary transition-colors">LinkedIn</a></li>
-              <li><a href="https://racharta.vercel.app" target="_blank" rel="noopener noreferrer" class="text-sm text-muted-foreground hover:text-primary transition-colors">Website</a></li>
-              <li><a href="mailto:hello@racharta.com" class="text-sm text-muted-foreground hover:text-primary transition-colors">Email</a></li>
+              <li>
+                <a
+                  href="https://www.linkedin.com/in/racharta"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >LinkedIn</a>
+              </li>
+              <li>
+                <a
+                  href="https://racharta.vercel.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >Website</a>
+              </li>
+              <li>
+                <a
+                  href="mailto:hello@racharta.com"
+                  class="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >Email</a>
+              </li>
             </ul>
           </div>
         </div>
 
         <!-- Copyright -->
         <div class="mt-10 pt-8 border-t border-border text-center">
-          <p class="text-sm text-muted-foreground">&copy; 2026 Rachmawati Ari Taurisia. All rights reserved.</p>
+          <p class="text-sm text-muted-foreground">
+            &copy; 2026 Rachmawati Ari Taurisia. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
@@ -144,7 +224,7 @@ const personSchema = {
               }
             });
           },
-          { threshold: 0, rootMargin: "0px 0px 200px 0px" }
+          { threshold: 0, rootMargin: "0px 0px 200px 0px" },
         );
 
         els.forEach((el) => observer.observe(el));

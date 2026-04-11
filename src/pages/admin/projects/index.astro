@@ -28,7 +28,7 @@ const allProjects = await db
     title: projects.title,
     slug: projects.slug,
     stack: projects.stack,
-    screenshotUrl: projects.screenshotUrl,
+    previewUrl: projects.previewUrl,
   })
   .from(projects)
   .orderBy(projects.id);
@@ -53,7 +53,7 @@ const allProjects = await db
           <th class="px-4 py-3 font-medium">ID</th>
           <th class="px-4 py-3 font-medium">Title</th>
           <th class="px-4 py-3 font-medium">Stack</th>
-          <th class="px-4 py-3 font-medium">Screenshot</th>
+          <th class="px-4 py-3 font-medium">Preview</th>
           <th class="px-4 py-3 font-medium">Actions</th>
         </tr>
       </thead>
@@ -77,10 +77,10 @@ const allProjects = await db
               </div>
             </td>
             <td class="px-4 py-3">
-              {p.screenshotUrl ? (
-                <img src={String(p.screenshotUrl)} alt="" class="h-8 w-14 rounded object-cover border border-border" loading="lazy" />
+              {p.previewUrl ? (
+                <img src={String(p.previewUrl)} alt="" class="h-8 w-14 rounded object-cover border border-border" loading="lazy" />
               ) : (
-                <span class="text-xs text-muted-foreground/50">—</span>
+                <span class="text-xs text-muted-foreground/50">none</span>
               )}
             </td>
             <td class="px-4 py-3">

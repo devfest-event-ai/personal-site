@@ -2,59 +2,27 @@
 -- Run AFTER schema.sql: turso db shell racharta-portfolio < docs/seed.sql
 
 -- ─── Projects ────────────────────────────────────────────────────────────────
-INSERT INTO projects (title, slug, description, json_source, stack, screenshot_url, blueprint_snippet) VALUES
+INSERT INTO projects (title, slug, description, stack, preview_url) VALUES
 (
   'Intelligent Invoice Tracker',
   'invoice-tracker',
   'Automated OCR-based system that extracts invoice data from Gmail attachments and populates a structured Google Sheets ledger — eliminating manual data entry for finance teams.',
-  'Email Asistant Invoice tracker.json',
   '["n8n","Gemini Vision","Gmail API","Google Sheets"]',
-  '/workflows/invoice-tracker.png',
-  '{
-  "nodes": [
-    { "type": "Gmail Trigger", "role": "Watch inbox for emails with attachments" },
-    { "type": "HTTP Request", "role": "Send attachment to Gemini Vision API for OCR" },
-    { "type": "Code Node", "role": "Parse extracted invoice fields (vendor, amount, date)" },
-    { "type": "Google Sheets", "role": "Append structured row to ledger spreadsheet" }
-  ],
-  "connections": "Gmail Trigger → HTTP Request → Code Node → Google Sheets"
-}'
+  '/workflows/invoice-tracker.png'
 ),
 (
   'Context-Aware AI Agent',
   'ai-chatbot-smkdev',
   'Telegram AI tutor built for SMKDEV learners, featuring Simple Memory for coherent multi-turn conversations. Students can ask follow-up questions without losing context across sessions.',
-  'ai_chatbot_smkdev_v_2_no_http.json',
   '["n8n","Telegram Bot API","Gemini Pro","LLM Memory"]',
-  '/workflows/ai-chatbot-smkdev.png',
-  '{
-  "nodes": [
-    { "type": "Telegram Trigger", "role": "Receive student message" },
-    { "type": "Simple Memory", "role": "Load conversation history for this chat ID" },
-    { "type": "Gemini Pro LLM", "role": "Generate context-aware response" },
-    { "type": "Simple Memory", "role": "Save updated conversation history" },
-    { "type": "Telegram", "role": "Send reply to student" }
-  ],
-  "connections": "Telegram Trigger → Simple Memory (load) → Gemini Pro → Simple Memory (save) → Telegram"
-}'
+  '/workflows/ai-chatbot-smkdev.png'
 ),
 (
   'Multi-Persona Work Assistant',
   'persona-assistant',
   'Task orchestrator that adapts communication tone and structure based on the selected persona (Engineer, Project Manager, or Casual) via dynamic system prompting — one workflow, three personalities.',
-  'n8n_asisten_kerja_otomatis_improved.json',
   '["n8n","Dynamic Prompting","HTTP Request","Node Automation"]',
-  '/workflows/persona-assistant.png',
-  '{
-  "nodes": [
-    { "type": "Webhook", "role": "Receive task input + selected persona" },
-    { "type": "Switch Node", "role": "Route to correct persona prompt template" },
-    { "type": "Set Node", "role": "Inject dynamic system prompt (Engineer / PM / Casual)" },
-    { "type": "HTTP Request", "role": "Call LLM API with persona-specific instructions" },
-    { "type": "Respond to Webhook", "role": "Return formatted task output" }
-  ],
-  "connections": "Webhook → Switch → Set (prompt) → HTTP Request → Respond"
-}'
+  '/workflows/persona-assistant.png'
 );
 
 -- ─── Writing ─────────────────────────────────────────────────────────────────

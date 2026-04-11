@@ -3,7 +3,6 @@ export const prerender = false;
 
 import type { TransitionDirectionalAnimations } from "astro";
 import { asc, eq } from "drizzle-orm";
-import BlueprintViewer from "@/components/BlueprintViewer.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import DetailNavigation from "@/components/DetailNavigation.astro";
 import { db } from "@/db";
@@ -30,9 +29,10 @@ const project = result[0];
 const projectId = Number(project.id);
 const title = String(project.title);
 const description = String(project.description);
-const screenshotUrl = String(project.screenshotUrl);
-const blueprintSnippet = String(project.blueprintSnippet);
+const previewUrl = String(project.previewUrl);
 const stack = String(project.stack);
+const urlSource = String(project.urlSource ?? "");
+const hasSource = Boolean(urlSource.trim());
 
 let stackTags: string[] = [];
 try {
@@ -41,9 +41,27 @@ try {
   stackTags = [stack];
 }
 
-const hasScreenshot = Boolean(
-  screenshotUrl?.trim() && screenshotUrl !== "null",
-);
+function isYouTubeUrl(url: string): boolean {
+  return /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)/i.test(url);
+}
+
+function getYouTubeEmbedUrl(url: string): string {
+  const match = url.match(
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+  );
+  return match ? `https://www.youtube.com/embed/${match[1]}` : "";
+}
+
+function convertDriveLink(url: string): string {
+  const match = url.match(/\/file\/d\/([^/]+)/);
+  if (match)
+    return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1200`;
+  return url;
+}
+
+const isYouTube = isYouTubeUrl(previewUrl);
+const hasPreview = Boolean(previewUrl?.trim() && previewUrl !== "null");
+const displayImageUrl = isYouTube ? "" : convertDriveLink(previewUrl);
 
 // Get prev/next projects
 const allProjects = await db
@@ -63,48 +81,129 @@ const nextProject =
     ? projectsList[currentIndex + 1]
     : null;
 
-// Shared transition names — must match ProjectCard.astro
-const imgName   = `proj-img-${slug}`;
+// Shared transition names: must match ProjectCard.astro
+const imgName = `proj-img-${slug}`;
 const titleName = `proj-title-${slug}`;
 const stackName = `proj-stack-${slug}`;
 
 // Per-element enter animations (staggered with delay)
 // transition:animate requires TransitionDirectionalAnimations (not TransitionAnimationPair directly)
 const fadeBack = {
-  old: { name: "vt-out", duration: "0.15s", easing: "ease-in",  fillMode: "both" },
-  new: { name: "vt-in",  duration: "0.2s",  easing: "ease-out", fillMode: "both" },
+  old: {
+    name: "vt-out",
+    duration: "0.15s",
+    easing: "ease-in",
+    fillMode: "both",
+  },
+  new: {
+    name: "vt-in",
+    duration: "0.2s",
+    easing: "ease-out",
+    fillMode: "both",
+  },
 };
 const animDown: TransitionDirectionalAnimations = {
-  forwards:  { old: { name: "vt-out",  duration: "0.15s", easing: "ease-in",  fillMode: "both" }, new: { name: "vt-down", duration: "0.35s", easing: "ease-out", fillMode: "both" } },
+  forwards: {
+    old: {
+      name: "vt-out",
+      duration: "0.15s",
+      easing: "ease-in",
+      fillMode: "both",
+    },
+    new: {
+      name: "vt-down",
+      duration: "0.35s",
+      easing: "ease-out",
+      fillMode: "both",
+    },
+  },
   backwards: fadeBack,
 };
 const animUp0: TransitionDirectionalAnimations = {
-  forwards:  { old: { name: "vt-out", duration: "0.15s", easing: "ease-in",  fillMode: "both" }, new: { name: "vt-up", duration: "0.4s", easing: "ease-out", fillMode: "both" } },
+  forwards: {
+    old: {
+      name: "vt-out",
+      duration: "0.15s",
+      easing: "ease-in",
+      fillMode: "both",
+    },
+    new: {
+      name: "vt-up",
+      duration: "0.4s",
+      easing: "ease-out",
+      fillMode: "both",
+    },
+  },
   backwards: fadeBack,
 };
 const animUp1: TransitionDirectionalAnimations = {
-  forwards:  { old: { name: "vt-out", duration: "0.15s", easing: "ease-in",  fillMode: "both" }, new: { name: "vt-up", duration: "0.4s", delay: "0.07s", easing: "ease-out", fillMode: "both" } },
+  forwards: {
+    old: {
+      name: "vt-out",
+      duration: "0.15s",
+      easing: "ease-in",
+      fillMode: "both",
+    },
+    new: {
+      name: "vt-up",
+      duration: "0.4s",
+      delay: "0.07s",
+      easing: "ease-out",
+      fillMode: "both",
+    },
+  },
   backwards: fadeBack,
 };
 const animUp2: TransitionDirectionalAnimations = {
-  forwards:  { old: { name: "vt-out", duration: "0.15s", easing: "ease-in",  fillMode: "both" }, new: { name: "vt-up", duration: "0.4s", delay: "0.14s", easing: "ease-out", fillMode: "both" } },
+  forwards: {
+    old: {
+      name: "vt-out",
+      duration: "0.15s",
+      easing: "ease-in",
+      fillMode: "both",
+    },
+    new: {
+      name: "vt-up",
+      duration: "0.4s",
+      delay: "0.14s",
+      easing: "ease-out",
+      fillMode: "both",
+    },
+  },
   backwards: fadeBack,
 };
 const animUp3: TransitionDirectionalAnimations = {
-  forwards:  { old: { name: "vt-out", duration: "0.15s", easing: "ease-in",  fillMode: "both" }, new: { name: "vt-up", duration: "0.4s", delay: "0.21s", easing: "ease-out", fillMode: "both" } },
+  forwards: {
+    old: {
+      name: "vt-out",
+      duration: "0.15s",
+      easing: "ease-in",
+      fillMode: "both",
+    },
+    new: {
+      name: "vt-up",
+      duration: "0.4s",
+      delay: "0.21s",
+      easing: "ease-out",
+      fillMode: "both",
+    },
+  },
   backwards: fadeBack,
 };
 
-const plainDescription = description.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+const plainDescription = description
+  .replace(/<[^>]*>/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
 const seo = {
-  title: `${title} — Rachmawati Ari Taurisia`,
+  title: `${title}: Rachmawati Ari Taurisia`,
   description: plainDescription.substring(0, 160),
 };
 ---
 
 <Layout {...seo}>
   <main>
-    <!-- Breadcrumb — slides down -->
+    <!-- Breadcrumb: slides down -->
     <section
       transition:animate={animDown}
       class="mx-auto max-w-4xl px-4 pt-8 sm:px-6"
@@ -121,7 +220,7 @@ const seo = {
     <!-- Header Section -->
     <section class="border-b border-border/40 bg-background px-4 py-12 sm:px-6">
       <div class="mx-auto max-w-4xl">
-        <!-- Label — fades in from top -->
+        <!-- Label: fades in from top -->
         <p
           transition:animate={animDown}
           class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground"
@@ -129,7 +228,7 @@ const seo = {
           Automation Workflow
         </p>
 
-        <!-- Title — shared element morphs from card -->
+        <!-- Title: shared element morphs from card -->
         <h1
           transition:name={titleName}
           class="mb-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl"
@@ -137,14 +236,14 @@ const seo = {
           {title}
         </h1>
 
-        <!-- Description — fades up (delay 0) -->
+        <!-- Description: fades up (delay 0) -->
         <div
           transition:animate={animUp0}
-          class="max-w-2xl text-base leading-relaxed text-muted-foreground prose prose-sm"
+          class=" text-base leading-relaxed text-muted-foreground prose prose-sm"
           set:html={description}
         />
 
-        <!-- Stack Badges — shared element morphs from card -->
+        <!-- Stack Badges: shared element morphs from card -->
         <div
           transition:name={stackName}
           class="mt-6 flex flex-wrap gap-2"
@@ -154,27 +253,49 @@ const seo = {
               {tag}
             </span>
           ))}
+          {hasSource && (
+            <a
+              href={urlSource}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 rounded-md border border-border/50 bg-muted/60 px-2.5 py-0.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+              Source
+            </a>
+          )}
         </div>
       </div>
     </section>
 
-    <!-- Hero Screenshot — shared image morphs from card, wrapper fades up (delay 1) -->
+    <!-- Hero Preview: image or YouTube embed (delay 1) -->
     <section
       transition:animate={animUp1}
       class="mx-auto max-w-4xl px-4 py-12 sm:px-6"
     >
       <div class="overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm">
-        {hasScreenshot ? (
+        {hasPreview ? (
           <>
-            <img
-              transition:name={imgName}
-              src={screenshotUrl}
-              alt={`${title} workflow canvas`}
-              class="h-full w-full object-cover"
-              width="1200"
-              height="675"
-              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
-            />
+            {isYouTube ? (
+              <iframe
+                src={getYouTubeEmbedUrl(previewUrl)}
+                title={`${title} video`}
+                class="h-64 w-full sm:h-80 md:h-96"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              />
+            ) : (
+              <img
+                transition:name={imgName}
+                src={displayImageUrl}
+                alt={`${title} workflow canvas`}
+                class="h-full w-full object-cover"
+                width="1200"
+                height="675"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
+              />
+            )}
             <div style="display:none" class="h-64 flex-col items-center justify-center gap-3 text-center bg-muted/60">
               <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground/30">
                 <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/><circle cx="15" cy="15" r="1" fill="currentColor"/>
@@ -196,27 +317,9 @@ const seo = {
       </div>
     </section>
 
-    <!-- Workflow Viewer — fades up (delay 2) -->
+    <!-- Navigation: fades up (delay 2) -->
     <section
       transition:animate={animUp2}
-      class="mx-auto max-w-4xl px-4 pb-16 sm:px-6"
-    >
-      <div class="rounded-2xl border border-border/50 bg-card shadow-sm">
-        <div class="border-b border-border/40 bg-primary/5 px-6 py-4">
-          <div class="flex items-center justify-between">
-            <span class="text-sm font-semibold text-foreground">n8n Workflow</span>
-            <span class="text-xs text-muted-foreground/60">Sanitized — no credentials</span>
-          </div>
-        </div>
-        <div class="p-6">
-          <BlueprintViewer snippet={blueprintSnippet} projectId={slug} />
-        </div>
-      </div>
-    </section>
-
-    <!-- Navigation — fades up (delay 3) -->
-    <section
-      transition:animate={animUp3}
       class="mx-auto max-w-4xl px-4 pb-16 sm:px-6"
     >
       <DetailNavigation

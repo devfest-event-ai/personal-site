@@ -286,6 +286,7 @@ function DetailPanel({ node, onClose }: DetailPanelProps) {
       >
         <span style={{ fontWeight: 700, fontSize: 13 }}>{d.label}</span>
         <button
+          type="button"
           onClick={onClose}
           style={{
             background: "none",
@@ -355,7 +356,7 @@ export default function WorkflowViewer({ snippet }: WorkflowViewerProps) {
   if (!initialNodes.length) {
     return (
       <div style={{ padding: 16, color: "#94a3b8", fontSize: 13 }}>
-        Workflow tidak dapat di-render — JSON tidak valid atau kosong.
+        Workflow tidak dapat di-render. JSON tidak valid atau kosong.
       </div>
     );
   }
