@@ -1,4 +1,3 @@
-import type { APIContext } from "astro";
 import { auth } from "@/lib/auth.js";
 
 /**
@@ -26,6 +25,6 @@ export function validateId(
 ): number | null {
   if (!id) return null;
   const num = Number(id);
-  if (isNaN(num) || num <= 0) return null;
+  if (Number.isNaN(num) || num <= 0) return null;
   return num;
 }

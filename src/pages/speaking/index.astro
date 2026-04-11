@@ -1,9 +1,10 @@
 ---
 import type { TransitionDirectionalAnimations } from "astro";
-import { asc } from "drizzle-orm";
+import { asc, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { speaking } from "@/db/schema";
 import Layout from "@/layouts/Layout.astro";
+import { isUpcoming } from "@/lib/date-utils";
 
 const result = await db
   .select({
@@ -17,7 +18,7 @@ const result = await db
     modules: speaking.modules,
   })
   .from(speaking)
-  .orderBy(asc(speaking.id));
+  .orderBy(asc(speaking.eventDate));
 
 function generateSlug(title: string): string {
   return title
@@ -35,6 +36,7 @@ const events = result.map((row) => ({
   role: String(row.role),
   description: String(row.description),
   link: String(row.link),
+  isUpcoming: isUpcoming(String(row.eventDate)),
   modules: (() => {
     try {
       return JSON.parse(String(row.modules)) as {
@@ -46,6 +48,10 @@ const events = result.map((row) => ({
     }
   })(),
 }));
+
+// Separate into upcoming and past events
+const upcomingEvents = events.filter((e) => e.isUpcoming);
+const pastEvents = events.filter((e) => !e.isUpcoming).reverse();
 
 const courseSchema = events[0]
   ? {
@@ -151,13 +157,13 @@ const animUp0: TransitionDirectionalAnimations = {
           <!-- Stats: right side on desktop -->
           <div class="flex shrink-0 items-center gap-8 lg:flex-col lg:items-end lg:gap-3">
             <div class="lg:text-right">
-              <p class="text-4xl font-bold tracking-tight text-foreground">{events.length}</p>
-              <p class="text-sm text-muted-foreground">workshop{events.length !== 1 ? "s" : ""}</p>
+              <p class="text-4xl font-bold tracking-tight text-foreground">{upcomingEvents.length}</p>
+              <p class="text-sm text-muted-foreground">upcoming</p>
             </div>
             <div class="h-8 w-px bg-border lg:hidden"></div>
             <div class="lg:text-right">
-              <p class="text-sm font-semibold text-foreground">2 automations</p>
-              <p class="text-xs text-muted-foreground">built per session</p>
+              <p class="text-4xl font-bold tracking-tight text-foreground">{pastEvents.length}</p>
+              <p class="text-sm text-muted-foreground">completed</p>
             </div>
           </div>
         </div>
@@ -169,91 +175,152 @@ const animUp0: TransitionDirectionalAnimations = {
       transition:animate={animUp0}
       class="mx-auto max-w-4xl px-4 py-12 sm:px-6"
     >
-      {events.length > 0 ? (
-        <div class="flex flex-col divide-y divide-border/50">
-          {events.map((event, i) => {
-            const dateObj = new Date(event.event_date);
-            const monthYear  = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "short" });
-            const fullDate   = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
-
-            return (
-              <article
-                data-animate
-                style={`transition-delay: ${80 + i * 80}ms`}
-                class="group py-10"
-              >
-                <a href={`/speaking/${event.slug}`} class="flex flex-col gap-4 sm:grid sm:grid-cols-[5rem_1fr] sm:gap-6">
-
-                  <!-- Date column -->
-                  <div class="hidden sm:flex sm:flex-col sm:items-end sm:pt-1">
-                    <time datetime={event.event_date} class="text-xs text-muted-foreground/60 leading-snug text-right">
-                      {monthYear}
-                    </time>
-                  </div>
-
-                  <!-- Content column -->
-                  <div class="flex flex-col gap-4">
-                    <div class="flex flex-wrap items-center gap-2">
-                      <span class="inline-flex items-center rounded-md border border-primary/30 bg-primary/5 px-2 py-0.5 text-xs font-medium text-primary">
-                        {event.provider}
-                      </span>
-                      <span class="inline-flex items-center rounded-md border border-border/50 bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                        {event.role}
-                      </span>
-                      <time datetime={event.event_date} class="text-xs text-muted-foreground/60 sm:hidden">
-                        {fullDate}
-                      </time>
-                    </div>
-
-                    <h2 class="text-xl font-bold tracking-tight text-foreground leading-snug sm:text-2xl group-hover:text-primary transition-colors">
-                      {event.title}
-                    </h2>
-
-                    <p class="text-sm leading-relaxed text-muted-foreground">
-                      {event.description}
-                    </p>
-
-                    <!-- Training modules -->
-                    {event.modules.length > 0 && (
-                      <div class="mt-2">
-                        <p class="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                          Training Modules
-                        </p>
-                        <ol class="space-y-4">
-                          {event.modules.map((mod, j) => (
-                            <li
-                              data-animate
-                              style={`transition-delay: ${200 + j * 80}ms`}
-                              class="flex gap-4"
-                            >
-                              <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                                {j + 1}
-                              </span>
-                              <div>
-                                <p class="font-semibold text-foreground">{mod.title}</p>
-                                <p class="mt-1 text-sm leading-relaxed text-muted-foreground">{mod.desc}</p>
-                              </div>
-                            </li>
-                          ))}
-                        </ol>
-                      </div>
-                    )}
-
-                    <!-- CTA -->
-                    <span class="mt-2 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-primary transition-all duration-200 hover:gap-2.5">
-                      View details
-                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-                      </svg>
-                    </span>
-                  </div>
-                </a>
-              </article>
-            );
-          })}
-        </div>
-      ) : (
+      {upcomingEvents.length === 0 && pastEvents.length === 0 ? (
         <p class="py-20 text-center text-muted-foreground">No events found.</p>
+      ) : (
+        <>
+          <!-- Upcoming Events -->
+          {upcomingEvents.length > 0 && (
+            <div class="mb-12">
+              <h2 class="mb-2 text-2xl font-bold tracking-tight text-foreground">
+                Upcoming
+              </h2>
+              <p class="mb-8 text-sm text-muted-foreground">
+                Register now to secure your spot.
+              </p>
+              <div class="flex flex-col divide-y divide-border/50">
+                {upcomingEvents.map((event, i) => {
+                  const dateObj = new Date(event.event_date);
+                  const monthYear = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "short" });
+                  const fullDate = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
+
+                  return (
+                    <article
+                      data-animate
+                      style={`transition-delay: ${80 + i * 80}ms`}
+                      class="group py-10"
+                    >
+                      <a href={`/speaking/${event.slug}`} class="flex flex-col gap-4 sm:grid sm:grid-cols-[5rem_1fr] sm:gap-6">
+
+                        <!-- Date column -->
+                        <div class="hidden sm:flex sm:flex-col sm:items-end sm:pt-1">
+                          <time datetime={event.event_date} class="text-xs text-muted-foreground/60 leading-snug text-right">
+                            {monthYear}
+                          </time>
+                          <span class="mt-1 inline-flex items-center rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-500">
+                            Upcoming
+                          </span>
+                        </div>
+
+                        <!-- Content column -->
+                        <div class="flex flex-col gap-4">
+                          <div class="flex flex-wrap items-center gap-2">
+                            <span class="inline-flex items-center rounded-md border border-primary/30 bg-primary/5 px-2 py-0.5 text-xs font-medium text-primary">
+                              {event.provider}
+                            </span>
+                            <span class="inline-flex items-center rounded-md border border-border/50 bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                              {event.role}
+                            </span>
+                            <time datetime={event.event_date} class="text-xs text-muted-foreground/60 sm:hidden">
+                              {fullDate}
+                            </time>
+                            <span class="inline-flex items-center rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-500 sm:hidden">
+                              Upcoming
+                            </span>
+                          </div>
+
+                          <h2 class="text-xl font-bold tracking-tight text-foreground leading-snug sm:text-2xl group-hover:text-primary transition-colors">
+                            {event.title}
+                          </h2>
+
+                          <p class="text-sm leading-relaxed text-muted-foreground">
+                            {event.description}
+                          </p>
+
+                          <!-- CTA -->
+                          <span class="mt-2 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-primary transition-all duration-200 hover:gap-2.5">
+                            Register now
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                            </svg>
+                          </span>
+                        </div>
+                      </a>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <!-- Past Events -->
+          {pastEvents.length > 0 && (
+            <div>
+              <h2 class="mb-2 text-2xl font-bold tracking-tight text-foreground">
+                Past Events
+              </h2>
+              <p class="mb-8 text-sm text-muted-foreground">
+                Previously delivered sessions.
+              </p>
+              <div class="flex flex-col divide-y divide-border/50">
+                {pastEvents.map((event, i) => {
+                  const dateObj = new Date(event.event_date);
+                  const monthYear = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "short" });
+                  const fullDate = dateObj.toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
+
+                  return (
+                    <article
+                      data-animate
+                      style={`transition-delay: ${80 + i * 80}ms`}
+                      class="group py-10 opacity-75"
+                    >
+                      <a href={`/speaking/${event.slug}`} class="flex flex-col gap-4 sm:grid sm:grid-cols-[5rem_1fr] sm:gap-6">
+
+                        <!-- Date column -->
+                        <div class="hidden sm:flex sm:flex-col sm:items-end sm:pt-1">
+                          <time datetime={event.event_date} class="text-xs text-muted-foreground/60 leading-snug text-right">
+                            {monthYear}
+                          </time>
+                        </div>
+
+                        <!-- Content column -->
+                        <div class="flex flex-col gap-4">
+                          <div class="flex flex-wrap items-center gap-2">
+                            <span class="inline-flex items-center rounded-md border border-primary/30 bg-primary/5 px-2 py-0.5 text-xs font-medium text-primary">
+                              {event.provider}
+                            </span>
+                            <span class="inline-flex items-center rounded-md border border-border/50 bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                              {event.role}
+                            </span>
+                            <time datetime={event.event_date} class="text-xs text-muted-foreground/60 sm:hidden">
+                              {fullDate}
+                            </time>
+                          </div>
+
+                          <h2 class="text-xl font-bold tracking-tight text-foreground leading-snug sm:text-2xl group-hover:text-primary transition-colors">
+                            {event.title}
+                          </h2>
+
+                          <p class="text-sm leading-relaxed text-muted-foreground">
+                            {event.description}
+                          </p>
+
+                          <!-- CTA -->
+                          <span class="mt-2 inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-all duration-200 hover:gap-2.5">
+                            View details
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                            </svg>
+                          </span>
+                        </div>
+                      </a>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
       )}
     </section>
   </main>

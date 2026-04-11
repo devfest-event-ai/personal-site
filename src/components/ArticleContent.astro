@@ -14,7 +14,7 @@ try {
 }
 
 function renderTiptapHtml(json: any): string {
-  if (!json || !json.content) return "";
+  if (!json?.content) return "";
 
   return json.content.map((node: any) => renderNode(node)).join("");
 }

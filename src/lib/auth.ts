@@ -4,19 +4,29 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/db/index.js";
 import * as schema from "@/db/schema.js";
 
+const secret = getSecret("BETTER_AUTH_SECRET");
+const baseURL = getSecret("BETTER_AUTH_URL");
+const googleClientId = getSecret("GOOGLE_CLIENT_ID");
+const googleClientSecret = getSecret("GOOGLE_CLIENT_SECRET");
+
+if (!secret) throw new Error("BETTER_AUTH_SECRET is not set");
+if (!baseURL) throw new Error("BETTER_AUTH_URL is not set");
+if (!googleClientId) throw new Error("GOOGLE_CLIENT_ID is not set");
+if (!googleClientSecret) throw new Error("GOOGLE_CLIENT_SECRET is not set");
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "sqlite",
     schema,
   }),
 
-  secret: getSecret("BETTER_AUTH_SECRET")!,
-  baseURL: getSecret("BETTER_AUTH_URL")!,
+  secret,
+  baseURL,
 
   socialProviders: {
     google: {
-      clientId: getSecret("GOOGLE_CLIENT_ID")!,
-      clientSecret: getSecret("GOOGLE_CLIENT_SECRET")!,
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
     },
   },
 

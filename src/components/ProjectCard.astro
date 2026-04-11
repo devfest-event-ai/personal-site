@@ -39,7 +39,7 @@ function getYouTubeId(url: string): string | null {
 function convertDriveLink(url: string): string {
   // Handle /file/d/ID/view format
   const match = url.match(/\/file\/d\/([^/]+)/);
-  if (match) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+  if (match) return `https://drive.google.com/thumbnail?id=${match[1]}`;
   return url;
 }
 
@@ -152,6 +152,17 @@ const stackName = `proj-stack-${project.slug}`;
           Source
         </a>
       )}
+    </div>
+
+    <!-- Detail button -->
+    <div class="mt-4 flex justify-end">
+      <a
+        href={`/projects/${project.slug}`}
+        class="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3.5 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+      >
+        Detail
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
     </div>
   </div>
 </article>

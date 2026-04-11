@@ -14,7 +14,7 @@ const pathname = Astro.url.pathname;
 const isActive = (href: string) =>
   href === "/admin"
     ? pathname === "/admin"
-    : pathname === href || pathname.startsWith(href + "/");
+    : pathname === href || pathname.startsWith(`${href}/`);
 
 const session = await auth.api
   .getSession({ headers: Astro.request.headers })

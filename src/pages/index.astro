@@ -1,17 +1,18 @@
 ---
-import { asc, desc } from "drizzle-orm";
+import { asc, desc, gte } from "drizzle-orm";
 import Hero from "@/components/Hero.astro";
 import LogoStrip from "@/components/LogoStrip.astro";
 import ProjectCard from "@/components/ProjectCard.astro";
 import { db } from "@/db";
 import { projects, speaking, stats as statsTable, writing } from "@/db/schema";
 import Layout from "@/layouts/Layout.astro";
+import { isUpcoming } from "@/lib/date-utils";
 
 const [projectsRaw, writingResult, speakingResult, statsResult] =
   await Promise.all([
     db.select().from(projects).orderBy(asc(projects.id)),
     db.select().from(writing).orderBy(desc(writing.publishedDate)).limit(3),
-    db.select().from(speaking).orderBy(asc(speaking.id)).limit(1),
+    db.select().from(speaking).orderBy(asc(speaking.eventDate)).limit(3),
     db
       .select()
       .from(statsTable)
@@ -37,15 +38,19 @@ const articles = writingResult.map((row) => ({
   published_date: String(row.publishedDate),
 }));
 
-const speakingEvents = speakingResult.map((row) => ({
-  id: Number(row.id),
-  title: String(row.title),
-  provider: String(row.provider),
-  event_date: String(row.eventDate),
-  role: String(row.role),
-  description: String(row.description),
-  link: String(row.link),
-}));
+const speakingEvents = speakingResult
+  .map((row) => ({
+    id: Number(row.id),
+    title: String(row.title),
+    provider: String(row.provider),
+    event_date: String(row.eventDate),
+    role: String(row.role),
+    description: String(row.description),
+    link: String(row.link),
+    isUpcoming: isUpcoming(String(row.eventDate)),
+  }))
+  .filter((e) => e.isUpcoming)
+  .slice(0, 1);
 
 const categoryColors: Record<string, string> = {
   Strategy: "border-blue-400/40 bg-blue-400/10 text-blue-400",
@@ -274,6 +279,7 @@ const stats =
 
         {speakingEvents.map((event, i) => {
           const dateFormatted = new Date(event.event_date).toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
+          const upcoming = event.isUpcoming;
           return (
             <div
               data-animate
@@ -290,6 +296,11 @@ const stats =
                 <span class="inline-flex items-center rounded-md bg-muted/60 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                   {event.provider}
                 </span>
+                {upcoming && (
+                  <span class="inline-flex items-center rounded-full bg-emerald-400/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-500">
+                    Upcoming
+                  </span>
+                )}
               </div>
               <div class="p-6 sm:p-8">
                 <div class="mb-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
@@ -308,17 +319,26 @@ const stats =
                 </div>
                 <h3 class="mb-3 text-xl font-bold tracking-tight text-foreground sm:text-2xl">{event.title}</h3>
                 <p class="mb-6 text-sm leading-relaxed text-muted-foreground">{event.description}</p>
-                <a
-                  href={event.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90 hover:shadow-md hover:shadow-primary/20"
-                >
-                  Daftar Workshop
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
-                  </svg>
-                </a>
+                {upcoming ? (
+                  <a
+                    href={event.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90 hover:shadow-md hover:shadow-primary/20"
+                  >
+                    Daftar Workshop
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+                    </svg>
+                  </a>
+                ) : (
+                  <p class="text-sm text-muted-foreground">
+                    Event ini sudah berlalu.{" "}
+                    <a href="/speaking" class="font-semibold text-primary underline underline-offset-4 hover:opacity-80">
+                      Lihat sesi lainnya
+                    </a>
+                  </p>
+                )}
               </div>
             </div>
           );

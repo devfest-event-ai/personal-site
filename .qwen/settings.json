@@ -6,7 +6,10 @@
       "Bash(pnpm run *)",
       "WebSearch",
       "Bash(bun *)",
-      "Bash(bunx *)"
+      "Bash(bunx *)",
+      "WebFetch(astro.build)",
+      "WebFetch(developers.cloudflare.com)",
+      "WebFetch(alexbobes.com)"
     ]
   },
   "$version": 3
